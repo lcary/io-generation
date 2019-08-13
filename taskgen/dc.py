@@ -260,7 +260,7 @@ def test_program(source, N=5, V=512):
     print('samples:')
     for s in samples:
         print('    {}'.format(s))
-    return program
+    return program, samples
 
 
 if __name__ == '__main__':
