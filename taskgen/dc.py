@@ -9,9 +9,6 @@ from taskgen.dsl.linq import get_linq_dsl
 Program = namedtuple("Program", ["src", "ins", "out", "fun", "bounds"])
 
 
-# LINQ LANGUAGE
-
-
 def get_language_dict(language):
     return {l.src: l for l in language}
 
