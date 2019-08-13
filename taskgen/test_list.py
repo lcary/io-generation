@@ -69,6 +69,21 @@ def test_count_len_in_tail():
     return program, samples
 
 
+def test_count_last_in_tail():
+    """
+    count (last xs) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
+    program, samples = generate_interesting(
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
+    )  # TODO: change N to 100
+    sample = (([3, 5, 4, 7, 5],), 2)
+    test_sample(sample, program)
+    return program, samples
+
+
 def run_tests():
     program, io_pairs = test_sum_top_index_sorted()
     verify_io_pairs(io_pairs, in_type=[int, [int]], out_type=int)
@@ -79,6 +94,8 @@ def run_tests():
     program, io_pairs = test_count_head_in_tail()
     verify_io_pairs(io_pairs, in_type=[int], out_type=int)
     program, io_pairs = test_count_len_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_last_in_tail()
     verify_io_pairs(io_pairs, in_type=[int], out_type=int)
 
 

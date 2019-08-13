@@ -138,9 +138,12 @@ def find_duplicates(samples):
     return remove_indices
 
 
-def test_sample(sample, program, debug=False):
-    if debug:
+def test_sample(sample, program):
+    try:
+        assert program.fun(sample[0]) == sample[1]
+    except AssertionError as e:
+        print("ERROR: evaluation result discrepancy")
         print("input:  ", sample[0])
         print("expect: ", sample[1])
         print("actual: ", program.fun(sample[0]))
-    assert program.fun(sample[0]) == sample[1]
+        raise e
