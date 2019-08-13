@@ -1,12 +1,7 @@
-#import sys
-#import os
-#sys.path.append(os.path.abspath('./'))
-
 import numpy as np
-import os
 import sys
 
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from math import ceil, sqrt
 
 

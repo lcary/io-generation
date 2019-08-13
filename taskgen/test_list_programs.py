@@ -1,12 +1,7 @@
-import sys
-import os
-
-sys.path.append(os.path.abspath(".."))
-
 import numpy as np
 
-from data_src.dc_program import test_program
-from data_src.dc_program import compile as compile_program
+from taskgen.dc_program import test_program
+from taskgen.dc_program import compile as compile_program
 
 
 def test_sample(sample, program, debug=False):
@@ -128,8 +123,12 @@ def test_count_len_in_tail():
     test_sample(sample, program)
 
 
-if __name__ == "__main__":
+def run_tests():
     # test_sum_top_index_sorted()
     # test_head_tail()
     test_count_head_in_tail()
     test_count_len_in_tail()
+
+
+if __name__ == '__main__':
+    run_tests()
