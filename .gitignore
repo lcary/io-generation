@@ -1,0 +1,11 @@
+venv/
+.idea/
+__pycache__/
+*.img
+*.simg
+*~
+*.out
+*.pyc
+*.log
+.mypy_cache/
+.DS_Store
