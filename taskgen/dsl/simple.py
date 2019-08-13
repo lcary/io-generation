@@ -1,8 +1,7 @@
-from collections import namedtuple
 from taskgen.dsl.types import Function
 
 
-def get_language(V):
+def get_simplelist_dsl(V):
     Null = V
     return [
         Function(

@@ -1,7 +1,7 @@
-import numpy as np
 import sys
-
 from collections import namedtuple
+
+import numpy as np
 
 from taskgen.dsl.linq import get_linq_language
 
