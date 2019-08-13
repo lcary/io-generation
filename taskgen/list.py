@@ -1,7 +1,6 @@
 import numpy as np
 
-from taskgen.dc import test_program
-from taskgen.dc import compile as compile_program
+from taskgen.dc import test_program, compile_program, get_linq_language
 
 
 def test_sample(sample, program, debug=False):
@@ -90,7 +89,8 @@ def generate_interesting_io_examples(
 
     t = time.time()
     source = source.replace(" | ", "\n")
-    program = compile_program(source, V=512, L=maxv)
+    language, _ = get_linq_language(V)
+    program = compile_program(language, source, V=V, L=maxv)
     interesting = False
     elapsed = time.time() - t
     samples = []
@@ -124,8 +124,8 @@ def test_count_len_in_tail():
 
 
 def run_tests():
-    # test_sum_top_index_sorted()
-    # test_head_tail()
+    test_sum_top_index_sorted()
+    test_head_tail()
     test_count_head_in_tail()
     test_count_len_in_tail()
 

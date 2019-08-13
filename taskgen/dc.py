@@ -53,7 +53,7 @@ def scanl1_bounds(l, A, B, L):
         raise Exception('Unsupported SCANL1 lambda, cannot compute valid input bounds.')
 
 # LINQ LANGUAGE
-def get_language(V):
+def get_linq_language(V):
     Null = V
     lambdas = [
         Function('IDT',     (int, int),          lambda i: i,                                         lambda A_B: [(A_B[0], A_B[1])]),
@@ -131,15 +131,19 @@ def get_language(V):
 
     return LINQ, lambdas
 
-def compile(source_code, V, L, min_input_range_length=0, verbose=False):
+
+def get_language_dict(language):
+    return {l.src: l for l in language}
+
+
+def compile_program(language, source_code, V, L, min_input_range_length=0, verbose=False):
     """ Taken in a program source code, the integer range V and the tape lengths L,
         and produces a Program.
         If L is None then input constraints are not computed.
         """
 
     # Source code parsing into intermediate representation
-    LINQ, _ = get_language(V)
-    LINQ_names = [l.src for l in LINQ]
+    lang_dict = get_language_dict(language)
 
     input_types = []
     types = []
@@ -162,7 +166,7 @@ def compile(source_code, V, L, min_input_range_length=0, verbose=False):
             if len(split[1]) > 1 or split[1] < 'a' or split[1] > 'z':
                 command += ' ' + split[1]
                 args = split[2:]
-            f = LINQ[LINQ_names.index(command)]
+            f = lang_dict[command]
             assert len(f.sig) - 1 == len(args)
             ps = [ord(arg) - ord('a') for arg in args]
             types.append(f.sig[-1])
@@ -198,6 +202,7 @@ def compile(source_code, V, L, min_input_range_length=0, verbose=False):
     my_functions = list(functions)
     my_pointers = list(pointers)
     my_program_length = program_length
+
     def program_executor(args):
         # print '--->'
         # for t in xrange(input_length, my_program_length):
@@ -217,6 +222,7 @@ def compile(source_code, V, L, min_input_range_length=0, verbose=False):
         program_executor,
         limits[:input_length]
     )
+
 
 def generate_IO_examples(program, N, L, V):
     """ Given a programs, randomly generates N IO examples.
@@ -242,12 +248,13 @@ def generate_IO_examples(program, N, L, V):
     return IO
 
 
-def test_program(source, N=5):
+def test_program(source, N=5, V=512):
     import time
     t = time.time()
+    language, _ = get_linq_language(V)
     source = source.replace(' | ', '\n')
-    program = compile(source, V=512, L=10)
-    samples = generate_IO_examples(program, N=N, L=10, V=512)
+    program = compile_program(language, source, V=V, L=10)
+    samples = generate_IO_examples(program, N=N, L=10, V=V)
     print(("time:", time.time()-t))
     print(program)
     print('samples:')
