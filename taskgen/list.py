@@ -153,5 +153,5 @@ def run_tests():
     verify_io_pairs(io_pairs, in_type=[int], out_type=int)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_tests()
