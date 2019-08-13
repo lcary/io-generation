@@ -1,7 +1,7 @@
 import numpy as np
 
-from taskgen.dc_program import test_program
-from taskgen.dc_program import compile as compile_program
+from taskgen.dc import test_program
+from taskgen.dc import compile as compile_program
 
 
 def test_sample(sample, program, debug=False):
