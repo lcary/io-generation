@@ -27,8 +27,17 @@ def compile_program(
     limits = [(-V, V)] * program_length
     if L is not None:
         try:
-            propagate_constraints(source_code, L, program_length, input_length, min_input_range_length, pointers, functions,
-                              limits, verbose)
+            propagate_constraints(
+                source_code,
+                L,
+                program_length,
+                input_length,
+                min_input_range_length,
+                pointers,
+                functions,
+                limits,
+                verbose,
+            )
         except ValueError:
             return None
 
@@ -83,8 +92,17 @@ def parse_source(language, source_code):
     return functions, input_types, pointers, types
 
 
-def propagate_constraints(source_code, L, program_length, input_length, min_input_range_length, pointers, functions,
-                          limits, verbose):
+def propagate_constraints(
+    source_code,
+    L,
+    program_length,
+    input_length,
+    min_input_range_length,
+    pointers,
+    functions,
+    limits,
+    verbose,
+):
     """
     Validate program by propagating input constraints and checking
     that all registers are useful/
