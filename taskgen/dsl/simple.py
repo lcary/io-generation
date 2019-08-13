@@ -1,8 +1,5 @@
 from collections import namedtuple
-
-
-Function = namedtuple('Function', ['src', 'sig', 'fun', 'bounds'])
-
+from taskgen.dsl.types import Function
 
 def get_language(V):
     Null = V
@@ -32,21 +29,3 @@ def get_language(V):
             lambda b: [(-V, V)],  # TODO: correct bounds?
         )
     ]
-
-
-# def get_language_dict(language):
-#     return {l.src: l for l in language}
-#
-#
-# def compile_program(language, source_code, V, L, min_input_range_length=0):
-#     """
-#     Parse source code to an intermediate representation.
-#
-#     Args:
-#         - V: integer range
-#     """
-#     lang_dict = get_language_dict(language)
-#     # ...
-#     pass
-#
-#          f = lang_dict[command]
