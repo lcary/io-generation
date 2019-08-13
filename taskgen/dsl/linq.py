@@ -60,12 +60,7 @@ def get_linq_dsl(V):
             lambda i: int(float(i) / 2),
             lambda b: [(2 * b[0], 2 * b[1])],
         ),
-        Function(
-            "doNEG",
-            (int, int),
-            lambda i: -i,
-            lambda b: [(-b[1] + 1, -b[0] + 1)],
-        ),
+        Function("doNEG", (int, int), lambda i: -i, lambda b: [(-b[1] + 1, -b[0] + 1)]),
         Function(
             "MUL3",
             (int, int),
@@ -73,10 +68,7 @@ def get_linq_dsl(V):
             lambda b: [(int((b[0] + 2) / 3), int(b[1] / 3))],
         ),
         Function(
-            "DIV3",
-            (int, int),
-            lambda i: int(float(i) / 3),
-            lambda b: [(b[0], b[1])],
+            "DIV3", (int, int), lambda i: int(float(i) / 3), lambda b: [(b[0], b[1])]
         ),
         Function(
             "MUL4",
@@ -85,41 +77,19 @@ def get_linq_dsl(V):
             lambda b: [(int((b[0] + 3) / 4), int(b[1] / 4))],
         ),
         Function(
-            "DIV4",
-            (int, int),
-            lambda i: int(float(i) / 4),
-            lambda b: [(b[0], b[1])],
+            "DIV4", (int, int), lambda i: int(float(i) / 4), lambda b: [(b[0], b[1])]
         ),
-        Function(
-            "SQR",
-            (int, int),
-            lambda i: i * i,
-            lambda b: sqr_bounds(b[0], b[1]),
-        ),
+        Function("SQR", (int, int), lambda i: i * i, lambda b: sqr_bounds(b[0], b[1])),
         # Function(
         #     'SQRT',
         #     (int, int),
         #     lambda i: int(sqrt(i)),
         #     lambda (A, B): [(max(0, A*A), B*B)]
         # ),
-        Function(
-            "isPOS", (int, bool), lambda i: i > 0, lambda b: [(b[0], b[1])]
-        ),
-        Function(
-            "isNEG", (int, bool), lambda i: i < 0, lambda b: [(b[0], b[1])]
-        ),
-        Function(
-            "isODD",
-            (int, bool),
-            lambda i: i % 2 == 1,
-            lambda b: [(b[0], b[1])],
-        ),
-        Function(
-            "isEVEN",
-            (int, bool),
-            lambda i: i % 2 == 0,
-            lambda b: [(b[0], b[1])],
-        ),
+        Function("isPOS", (int, bool), lambda i: i > 0, lambda b: [(b[0], b[1])]),
+        Function("isNEG", (int, bool), lambda i: i < 0, lambda b: [(b[0], b[1])]),
+        Function("isODD", (int, bool), lambda i: i % 2 == 1, lambda b: [(b[0], b[1])]),
+        Function("isEVEN", (int, bool), lambda i: i % 2 == 0, lambda b: [(b[0], b[1])]),
         Function(
             "+",
             (int, int, int),
@@ -133,22 +103,13 @@ def get_linq_dsl(V):
             lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
         ),
         Function(
-            "*",
-            (int, int, int),
-            lambda i, j: i * j,
-            lambda b: mul_bounds(b[0], b[1]),
+            "*", (int, int, int), lambda i, j: i * j, lambda b: mul_bounds(b[0], b[1])
         ),
         Function(
-            "MIN",
-            (int, int, int),
-            lambda i, j: min(i, j),
-            lambda b: [(b[0], b[1])],
+            "MIN", (int, int, int), lambda i, j: min(i, j), lambda b: [(b[0], b[1])]
         ),
         Function(
-            "MAX",
-            (int, int, int),
-            lambda i, j: max(i, j),
-            lambda b: [(b[0], b[1])],
+            "MAX", (int, int, int), lambda i, j: max(i, j), lambda b: [(b[0], b[1])]
         ),
     ]
 
@@ -161,10 +122,7 @@ def get_linq_dsl(V):
                 lambda b: [(b[0], b[1])],
             ),
             Function(
-                "SORT",
-                ([int], [int]),
-                lambda xs: sorted(xs),
-                lambda b: [(b[0], b[1])],
+                "SORT", ([int], [int]), lambda xs: sorted(xs), lambda b: [(b[0], b[1])]
             ),
             Function(
                 "TAKE",
@@ -225,9 +183,7 @@ def get_linq_dsl(V):
                 "SUM",
                 ([int], int),
                 lambda xs: sum(xs),
-                lambda b: [
-                    (int(b[0] / b[2]) + 1, int(b[1] / b[2]))
-                ],
+                lambda b: [(int(b[0] / b[2]) + 1, int(b[1] / b[2]))],
             ),
         ]
         + [
@@ -265,8 +221,7 @@ def get_linq_dsl(V):
                 "ZIPWITH " + l.src,
                 ([int], [int], [int]),
                 lambda xs, ys, l=l: [l.fun(x, y) for (x, y) in zip(xs, ys)],
-                lambda b, l=l: l.bounds((b[0], b[1]))
-                + l.bounds((b[0], b[1])),
+                lambda b, l=l: l.bounds((b[0], b[1])) + l.bounds((b[0], b[1])),
             )
             for l in lambdas
             if l.sig == (int, int, int)

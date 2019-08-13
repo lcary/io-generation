@@ -51,7 +51,9 @@ def test_count_head_in_tail():
     V = 512
     language = get_list_dsl(V)
     source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
-    program, samples = generate_interesting_io_examples(source, N=10, V=V, language=language)
+    program, samples = generate_interesting_io_examples(
+        source, N=10, V=V, language=language
+    )
     sample = (([3, 5, 4, 7, 5],), 0)
     test_sample(sample, program)
     sample = (([5, 4, 7, 5],), 1)
@@ -142,7 +144,14 @@ def generate_mixed_length_io_arrays(
 
 
 def generate_interesting_io_examples(
-    source, N=5, V=512, maxv=10, max_io_len=10, min_variance=1.0, timeout=10, language=None
+    source,
+    N=5,
+    V=512,
+    maxv=10,
+    max_io_len=10,
+    min_variance=1.0,
+    timeout=10,
+    language=None,
 ):
     if language is None:
         language, _ = get_linq_dsl(V)
