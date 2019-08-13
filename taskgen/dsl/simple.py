@@ -25,7 +25,7 @@ def get_simplelist_dsl(V):
         Function(
             "count",
             (int, [int], int),
-            lambda n, xs: len(list(filter(lambda x: x == n, xs))),
-            lambda b: [(-V, V)],  # TODO: correct bounds?
+            lambda n, xs: len(list(filter(lambda i: i == n, xs))),
+            lambda b: [(0, b[2]), (b[0], b[1])],
         ),
     ]
