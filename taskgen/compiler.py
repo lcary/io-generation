@@ -8,7 +8,7 @@ def get_language_dict(language):
 
 
 def compile_program(
-    language, source_code, V, L, min_input_range_length=0, verbose=False
+    language, source_code, V, L, min_input_range_length=0,
 ):
     """
     Parses a program into an intermediate representation capable of constraints
@@ -24,22 +24,19 @@ def compile_program(
     input_length = len(input_types)
     program_length = len(types)
 
-    limits = [(-V, V)] * program_length
-    if L is not None:
-        try:
-            propagate_constraints(
-                source_code,
-                L,
-                program_length,
-                input_length,
-                min_input_range_length,
-                pointers,
-                functions,
-                limits,
-                verbose,
-            )
-        except ValueError:
-            return None
+    try:
+        limits = propagate_constraints(
+            source_code,
+            V,
+            L,
+            program_length,
+            input_length,
+            min_input_range_length,
+            pointers,
+            functions,
+        )
+    except PropagationError:
+        return None
 
     # Construct executor
     my_input_types = list(input_types)
@@ -92,21 +89,27 @@ def parse_source(language, source_code):
     return functions, input_types, pointers, types
 
 
+class PropagationError(Exception):
+    pass
+
+
 def propagate_constraints(
     source_code,
+    V,
     L,
     program_length,
     input_length,
     min_input_range_length,
     pointers,
-    functions,
-    limits,
-    verbose,
+    functions
 ):
     """
     Validate program by propagating input constraints and checking
     that all registers are useful/
     """
+    limits = [(-V, V)] * program_length
+    if L is None:
+        return limits
     for t in range(program_length - 1, -1, -1):
         if t >= input_length:
             lim_l, lim_u = limits[t]
@@ -119,6 +122,6 @@ def propagate_constraints(
                     min(limits[p][1], new_lims[a][1]),
                 )
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
-            if verbose:
-                print(("Program with no valid inputs: %s" % source_code))
-            raise ValueError
+            print(("Program with no valid inputs: %s" % source_code))
+            raise PropagationError
+    return limits
