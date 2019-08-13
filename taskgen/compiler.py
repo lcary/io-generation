@@ -16,12 +16,16 @@ def get_language_dict(language):
 def compile_program(
     language, source_code, V, L, min_input_range_length=0, verbose=False
 ):
-    """ Taken in a program source code, the integer range V and the tape lengths L,
-        and produces a Program.
-        If L is None then input constraints are not computed.
-        """
+    """
+    Parses a program into an intermediate representation capable of constraints
+    checking and execution.
 
-    # Source code parsing into intermediate representation
+    Args:
+        - language: a DSL used to parse the tokens in a program
+        - source_code: string of source that will be parsed
+        - V: range of values allowed as integer range
+        - L: "tape lengths"  # TODO: improve this definition
+    """
     lang_dict = get_language_dict(language)
 
     input_types = []
@@ -29,9 +33,7 @@ def compile_program(
     functions = []
     pointers = []
     for line in source_code.split("\n"):
-        # print("'%s'" % line)
         instruction = line[5:]
-        # instruction = line
         if instruction in ["int", "[int]"]:
             input_types.append(eval(instruction))
             types.append(eval(instruction))
@@ -100,56 +102,3 @@ def compile_program(
     return Program(
         source_code, input_types, types[-1], program_executor, limits[:input_length]
     )
-
-
-def generate_IO_examples(program, N, L, V):
-    """ Given a programs, randomly generates N IO examples.
-        using the specified length L for the input arrays. """
-    input_types = program.ins
-    input_nargs = len(input_types)
-
-    # Generate N input-output pairs
-    IO = []
-    for _ in range(N):
-        input_value = [None] * input_nargs
-        for a in range(input_nargs):
-            minv, maxv = program.bounds[a]
-            if input_types[a] == int:
-                input_value[a] = np.random.randint(minv, maxv)
-            elif input_types[a] == [int]:
-                input_value[a] = list(np.random.randint(minv, maxv, size=L))
-            else:
-                raise Exception(
-                    "Unsupported input type "
-                    + input_types[a]
-                    + " for random input generation"
-                )
-        output_value = program.fun(input_value)
-        IO.append((input_value, output_value))
-        assert (
-            (program.out == int and output_value <= V)
-            or (program.out == [int] and len(output_value) == 0)
-            or (program.out == [int] and max(output_value) <= V)
-        )
-    return IO
-
-
-def test_program(source, N=5, V=512, language=None):
-    if language is None:
-        language, _ = get_linq_dsl(V)
-
-    t = time.time()
-    source = source.replace(" | ", "\n")
-    program = compile_program(language, source, V=V, L=10)
-    samples = generate_IO_examples(program, N=N, L=10, V=V)
-    print(("time:", time.time() - t))
-    print(program)
-    print("samples:")
-    for s in samples:
-        print("    {}".format(s))
-    return program, samples
-
-
-if __name__ == "__main__":
-    source = sys.argv[1]
-    test_program(source)

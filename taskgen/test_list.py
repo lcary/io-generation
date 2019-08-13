@@ -2,8 +2,8 @@ import time
 
 import numpy as np
 
+from taskgen.compiler import compile_program
 from taskgen.constraints import verify_io_pairs, is_int
-from taskgen.dc import test_program, compile_program
 from taskgen.dsl.linq import get_linq_dsl
 from taskgen.dsl.simple import get_list_dsl
 
@@ -28,7 +28,9 @@ def test_head():
     V = 512
     source = "a <- [int] | b <- head a"
     language = get_list_dsl(V)
-    program, samples = generate_interesting_io_examples(source, N=10, V=V, language=language)
+    program, samples = generate_interesting_io_examples(
+        source, N=10, V=V, language=language
+    )
     sample = (([3, 5, 4, 7, 5],), 3)
     test_sample(sample, program)
     return program, samples
@@ -38,7 +40,9 @@ def test_tail():
     V = 512
     source = "a <- [int] | b <- tail a"
     language = get_list_dsl(V)
-    program, samples = generate_interesting_io_examples(source, N=10, V=V, language=language)
+    program, samples = generate_interesting_io_examples(
+        source, N=10, V=V, language=language
+    )
     sample = (([3, 5, 4, 7, 5],), [5, 4, 7, 5])
     test_sample(sample, program)
     return program, samples
@@ -52,7 +56,7 @@ def test_count_head_in_tail():
     language = get_list_dsl(V)
     source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
     program, samples = generate_interesting_io_examples(
-        source, N=10, V=V, language=language, min_variance=3.5,
+        source, N=10, V=V, language=language, min_variance=3.5
     )
     sample = (([3, 5, 4, 7, 5],), 0)
     test_sample(sample, program)
@@ -71,7 +75,7 @@ def test_count_len_in_tail():
     language = get_list_dsl(V)
     source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
     program, samples = generate_interesting_io_examples(
-        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5,
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
     )  # TODO: change N to 100
     sample = (([3, 5, 4, 7, 5],), 2)
     test_sample(sample, program)
@@ -117,7 +121,7 @@ def get_output_variance(outputs):
         # is list[int]
         outputs = list(map(sum, outputs))
     else:
-        raise ValueError('Unsupported output type for outputs ({})'.format(outputs))
+        raise ValueError("Unsupported output type for outputs ({})".format(outputs))
     return np.var(outputs)
 
 
@@ -199,13 +203,14 @@ def generate_interesting_io_examples(
     print("samples:")
     for s in samples:
         print("    {}".format(s))
-    print('output variance: ', get_output_variance(get_outputs(samples)))
+    print("output variance: ", get_output_variance(get_outputs(samples)))
     return program, samples
 
 
 def reduce_samples(samples, N):
     remove_indices = find_duplicates(samples)
-    remove_indices = remove_indices[:len(samples) - N]
+    max_remove = len(samples) - N
+    remove_indices = remove_indices[:max_remove]
     samples = [s for i, s in enumerate(samples) if i not in remove_indices]
     # truncate list to handle case of no duplicates
     samples = samples[:N]
