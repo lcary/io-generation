@@ -1,8 +1,11 @@
+import time
+
 import numpy as np
 
 from taskgen.constraints import verify_io_pairs
 from taskgen.dc import test_program, compile_program
-from taskgen.dsl.linq import get_linq_language
+from taskgen.dsl.linq import get_linq_dsl
+from taskgen.dsl.simple import get_list_dsl
 
 
 def test_sample(sample, program, debug=False):
@@ -22,25 +25,33 @@ def test_sum_top_index_sorted():
 
 
 def test_head():
-    source = "a <- [int] | b <- HEAD a"
-    program, samples = test_program(source, N=10)
+    V = 512
+    source = "a <- [int] | b <- head a"
+    language = get_list_dsl(V)
+    program, samples = test_program(source, N=10, V=V, language=language)
     sample = (([3, 5, 4, 7, 5],), 3)
     test_sample(sample, program)
     return program, samples
 
 
 def test_tail():
-    source = "a <- [int] | b <- TAIL a"
-    program, samples = test_program(source, N=10)
+    V = 512
+    source = "a <- [int] | b <- tail a"
+    language = get_list_dsl(V)
+    program, samples = test_program(source, N=10, V=V, language=language)
     sample = (([3, 5, 4, 7, 5],), [5, 4, 7, 5])
     test_sample(sample, program)
     return program, samples
 
 
 def test_count_head_in_tail():
-    # src1 = 'count (head xs) (tail xs)'
-    source = "a <- [int] | b <- TAIL a | c <- HEAD a | d <- COUNT c b"
-    program, samples = generate_interesting_io_examples(source, N=10)
+    """
+    count (head xs) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
+    program, samples = generate_interesting_io_examples(source, N=10, V=V, language=language)
     sample = (([3, 5, 4, 7, 5],), 0)
     test_sample(sample, program)
     sample = (([5, 4, 7, 5],), 1)
@@ -48,6 +59,38 @@ def test_count_head_in_tail():
     sample = (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 3)
     test_sample(sample, program)
     return program, samples
+
+
+def test_count_len_in_tail():
+    """
+    count (len xs) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
+    program, samples = generate_interesting_io_examples(
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language
+    )  # TODO: change N to 100
+    sample = (([3, 5, 4, 7, 5],), 2)
+    test_sample(sample, program)
+    sample = (([5, 4, 7, 5],), 1)
+    test_sample(sample, program)
+    sample = (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0)
+    test_sample(sample, program)
+    return program, samples
+
+
+def run_tests():
+    program, io_pairs = test_sum_top_index_sorted()
+    verify_io_pairs(io_pairs, in_type=[int, [int]], out_type=int)
+    program, io_pairs = test_head()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=[int])
+    program, io_pairs = test_count_head_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_len_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
 
 
 def get_inputs(samples):
@@ -99,13 +142,13 @@ def generate_mixed_length_io_arrays(
 
 
 def generate_interesting_io_examples(
-    source, N=5, V=512, maxv=10, max_io_len=10, min_variance=1.0, timeout=10
+    source, N=5, V=512, maxv=10, max_io_len=10, min_variance=1.0, timeout=10, language=None
 ):
-    import time
+    if language is None:
+        language, _ = get_linq_dsl(V)
 
     t = time.time()
     source = source.replace(" | ", "\n")
-    language, _ = get_linq_language(V)
     program = compile_program(language, source, V=V, L=maxv)
     interesting = False
     elapsed = time.time() - t
@@ -123,34 +166,6 @@ def generate_interesting_io_examples(
     for s in samples:
         print("    {}".format(s))
     return program, samples
-
-
-def test_count_len_in_tail():
-    # src2 = 'count (len xs) (tail xs)'
-    source = "a <- [int] | b <- TAIL a | c <- LEN a | d <- COUNT c b"
-    program, samples = generate_interesting_io_examples(
-        source, N=10, maxv=10, max_io_len=10
-    )  # TODO: change N to 100
-    sample = (([3, 5, 4, 7, 5],), 2)
-    test_sample(sample, program)
-    sample = (([5, 4, 7, 5],), 1)
-    test_sample(sample, program)
-    sample = (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0)
-    test_sample(sample, program)
-    return program, samples
-
-
-def run_tests():
-    program, io_pairs = test_sum_top_index_sorted()
-    verify_io_pairs(io_pairs, in_type=[int, [int]], out_type=int)
-    program, io_pairs = test_head()
-    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
-    program, io_pairs = test_tail()
-    verify_io_pairs(io_pairs, in_type=[int], out_type=[int])
-    program, io_pairs = test_count_head_in_tail()
-    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
-    program, io_pairs = test_count_len_in_tail()
-    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
 
 
 if __name__ == "__main__":

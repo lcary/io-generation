@@ -1,9 +1,10 @@
 import sys
+import time
 from collections import namedtuple
 
 import numpy as np
 
-from taskgen.dsl.linq import get_linq_language
+from taskgen.dsl.linq import get_linq_dsl
 
 Program = namedtuple("Program", ["src", "ins", "out", "fun", "bounds"])
 
@@ -136,11 +137,11 @@ def generate_IO_examples(program, N, L, V):
     return IO
 
 
-def test_program(source, N=5, V=512):
-    import time
+def test_program(source, N=5, V=512, language=None):
+    if language is None:
+        language, _ = get_linq_dsl(V)
 
     t = time.time()
-    language, _ = get_linq_language(V)
     source = source.replace(" | ", "\n")
     program = compile_program(language, source, V=V, L=10)
     samples = generate_IO_examples(program, N=N, L=10, V=V)
