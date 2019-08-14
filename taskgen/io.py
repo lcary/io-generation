@@ -170,11 +170,13 @@ def test_io(program, io_pair):
         raise e
 
 
-def pretty_print_results(d, margin=7):
+def pretty_print_results(d, margin=7, debug=False):
     print("program: ", d['program'].src.replace("\n", " | "))
     col_width = max(len(str(i)) for row in d['io_pairs'] for i in row) + margin
     for io_pair in d['io_pairs']:
         i = str(io_pair[0])
         o = str(io_pair[1])
         print("i: " + i.ljust(col_width) + "o: " + o)
+    if debug:
+        print(("output variance: ", d['output_variance'], "runtime (seconds): ", d['runtime_seconds']))
     print()
