@@ -12,18 +12,17 @@ def test_sum_top_index_sorted():
     return program, io_pairs
 
 
+def _generate_interesting(*args, **kwargs):
+    # Set defaults
+    kwargs["min_bound"] = kwargs.get("min_bound", 0)
+    kwargs["max_bound"] = kwargs.get("max_bound", 10)
+    kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
+    return generate_interesting(*args, **kwargs)
+
+
 def test_head():
-    min_bound = 0
-    max_bound = 10
     source = "a <- [int] | b <- head a"
-    language = get_list_dsl(max_bound)
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        language=language,
-    )
+    program, io_pairs = _generate_interesting(source, num_examples=10)
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 3)
     test_io_pair(io_pair, program)
@@ -31,17 +30,8 @@ def test_head():
 
 
 def test_tail():
-    min_bound = 0
-    max_bound = 10
     source = "a <- [int] | b <- tail a"
-    language = get_list_dsl(max_bound)
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        language=language,
-    )
+    program, io_pairs = _generate_interesting(source, num_examples=10)
     verify_io_pairs(io_pairs, sig=([int], [int]))
     io_pair = (([3, 5, 4, 7, 5],), [5, 4, 7, 5])
     test_io_pair(io_pair, program)
@@ -52,18 +42,8 @@ def test_count_head_in_tail():
     """
     count (head xs) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        min_variance=3.5,
-        language=language,
-    )
+    program, io_pairs = _generate_interesting(source, num_examples=10, min_variance=3.5)
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 0)
     test_io_pair(io_pair, program)
@@ -78,19 +58,9 @@ def test_count_len_in_tail():
     """
     count (len xs) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 2)
@@ -106,19 +76,9 @@ def test_count_last_in_tail():
     """
     count (last xs) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 2)
@@ -130,19 +90,9 @@ def test_count_len_tail_in_tail():
     """
     count (len (tail xs)) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- len b | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 1)
@@ -154,19 +104,9 @@ def test_count_head_tail_in_tail():
     """
     count (head (tail xs)) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- head b | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 2)
@@ -178,19 +118,9 @@ def test_count_last_tail_in_tail():
     """
     count (last (tail xs)) (tail xs)
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- last b | d <- count c b"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 2)
@@ -202,20 +132,9 @@ def test_count_head_tail_tail_tail_in_list():
     """
     count (head (tail (tail (tail xs)))) xs
     """
-    min_bound = 0
-    max_bound = 10
-    language = get_list_dsl(max_bound)
     source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        maxv=10,
-        min_io_len=3,
-        max_io_len=10,
-        min_variance=3.5,
-        language=language,
+    program, io_pairs = _generate_interesting(
+        source, num_examples=10, maxv=10, min_io_len=3, max_io_len=10, min_variance=3.5
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 1)
@@ -224,17 +143,8 @@ def test_count_head_tail_tail_tail_in_list():
 
 
 def test_count_n():
-    min_bound = 0
-    max_bound = 10
     source = "a <- int | b <- [int] | c <- count a b"
-    language = get_list_dsl(max_bound)
-    program, io_pairs = generate_interesting(
-        source,
-        num_examples=10,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        language=language,
-    )
+    program, io_pairs = _generate_interesting(source, num_examples=10)
     verify_io_pairs(io_pairs, sig=([int, [int]], int))
     io_pair = ((3, [3, 5, 4, 7, 5]), 1)
     test_io_pair(io_pair, program)
