@@ -49,7 +49,8 @@ class ArgConstraints(object):
         return all(self.constraints[i].verify(v) for i, v in enumerate(val))
 
 
-def verify_io_pairs(io_pairs, in_type, out_type):
+def verify_io_pairs(io_pairs, sig):
+    in_type, out_type = sig
     for i, o in io_pairs:
         try:
             verify_input_type(i, in_type)

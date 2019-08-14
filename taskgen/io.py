@@ -7,12 +7,12 @@ from taskgen.constraints import is_int
 from taskgen.dsl.linq import get_linq_dsl
 
 
-def get_inputs(samples):
-    return [p[0] for p in samples]
+def get_inputs(io_pairs):
+    return [p[0] for p in io_pairs]
 
 
-def get_outputs(samples):
-    return [p[1] for p in samples]
+def get_outputs(io_pairs):
+    return [p[1] for p in io_pairs]
 
 
 def get_output_variance(outputs):
@@ -33,8 +33,8 @@ def get_output_variance(outputs):
     return np.var(outputs)
 
 
-def is_interesting(samples, min_variance):
-    outputs = get_outputs(samples)
+def is_interesting(io_pairs, min_variance):
+    outputs = get_outputs(io_pairs)
     output_var = get_output_variance(outputs)
     if output_var is None:
         return False
@@ -95,41 +95,41 @@ def generate_interesting(
     program = compile_program(language, source, V=V, L=maxv)
     interesting = False
     elapsed = time.time() - t
-    samples = []
+    io_pairs = []
     while not interesting and elapsed < timeout:
-        latest_samples = generate_io_pairs(
+        latest_io_pairs = generate_io_pairs(
             program, N=N, V=V, min_len=min_io_len, max_len=max_io_len
         )
-        samples.extend(latest_samples)
-        samples = reduce_samples(samples, N)
+        io_pairs.extend(latest_io_pairs)
+        io_pairs = reduce_io_pairs(io_pairs, N)
         elapsed = time.time() - t
-        if is_interesting(samples, min_variance):
+        if is_interesting(io_pairs, min_variance):
             interesting = True
     print(("time:", elapsed))
     print(program)
     if not interesting:
-        print("WARN: Timeout hit while finding most samples.")
-    print("samples:")
-    for s in samples:
+        print("WARN: Timeout hit while finding most io_pairs.")
+    print("io_pairs:")
+    for s in io_pairs:
         print("    {}".format(s))
-    print("output variance: ", get_output_variance(get_outputs(samples)))
-    return program, samples
+    print("output variance: ", get_output_variance(get_outputs(io_pairs)))
+    return program, io_pairs
 
 
-def reduce_samples(samples, N):
-    remove_indices = find_duplicates(samples)
-    max_remove = len(samples) - N
+def reduce_io_pairs(io_pairs, N):
+    remove_indices = find_duplicates(io_pairs)
+    max_remove = len(io_pairs) - N
     remove_indices = remove_indices[:max_remove]
-    samples = [s for i, s in enumerate(samples) if i not in remove_indices]
+    io_pairs = [s for i, s in enumerate(io_pairs) if i not in remove_indices]
     # truncate list to handle case of no duplicates
-    samples = samples[:N]
-    return samples
+    io_pairs = io_pairs[:N]
+    return io_pairs
 
 
-def find_duplicates(samples):
+def find_duplicates(io_pairs):
     seen = set()
     remove_indices = []
-    for (index, pair) in enumerate(samples):
+    for (index, pair) in enumerate(io_pairs):
         o = str(pair[1])
         if o in seen:
             remove_indices.append(index)
@@ -139,12 +139,12 @@ def find_duplicates(samples):
     return remove_indices
 
 
-def test_sample(sample, program):
+def test_io_pair(io_pair, program):
     try:
-        assert program.fun(sample[0]) == sample[1]
+        assert program.fun(io_pair[0]) == io_pair[1]
     except AssertionError as e:
         print("ERROR: evaluation result discrepancy")
-        print("input:  ", sample[0])
-        print("expect: ", sample[1])
-        print("actual: ", program.fun(sample[0]))
+        print("input:  ", io_pair[0])
+        print("expect: ", io_pair[1])
+        print("actual: ", program.fun(io_pair[0]))
         raise e
