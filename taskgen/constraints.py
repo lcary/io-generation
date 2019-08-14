@@ -49,8 +49,13 @@ class ArgConstraints(object):
         return all(self.constraints[i].verify(v) for i, v in enumerate(val))
 
 
-def verify_io_pairs(io_pairs, sig):
-    in_type, out_type = sig
+def verify_types(io_pairs, sig):
+    try:
+        in_type, out_type = sig
+    except (TypeError, ValueError) as e:
+        print("ERROR: unable to unpack input/output type from signature ({})".format(sig))
+        raise e
+
     for i, o in io_pairs:
         try:
             verify_input_type(i, in_type)

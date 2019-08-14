@@ -150,7 +150,7 @@ def find_duplicates(io_pairs):
     return remove_indices
 
 
-def test_io_pair(io_pair, program):
+def test_io(program, io_pair):
     try:
         assert program.fun(io_pair[0]) == io_pair[1]
     except AssertionError as e:
