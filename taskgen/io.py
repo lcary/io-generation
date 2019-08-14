@@ -41,7 +41,9 @@ def is_interesting(io_pairs, min_variance):
     return output_var >= min_variance
 
 
-def generate_io_pairs(program, num_examples, max_bound, min_len=1, max_len=10):  # TODO: allow empty lists
+def generate_io_pairs(
+    program, num_examples, max_bound, min_len=1, max_len=10
+):  # TODO: allow empty lists
     """
     Given a program, randomly generates N input-output examples according to constraints.
     If an argument type or value in an argument is an integer, pick a random int within bounds.
@@ -75,20 +77,38 @@ def generate_io_pairs(program, num_examples, max_bound, min_len=1, max_len=10): 
     return io_pairs
 
 
-def generate_interesting(source, num_examples=5, max_bound=512, maxv=10, min_io_len=1, max_io_len=10, min_variance=1.0,
-                         timeout=5.0, language=None, min_bound=None, debug=False):
+def generate_interesting(
+    source,
+    num_examples=5,
+    max_bound=512,
+    maxv=10,
+    min_io_len=1,
+    max_io_len=10,
+    min_variance=1.0,
+    timeout=5.0,
+    language=None,
+    min_bound=None,
+    debug=False,
+):
     if language is None:
         language, _ = get_linq_dsl(max_bound, min_bound=min_bound)
 
     t = time.time()
     source = source.replace(" | ", "\n")
-    program = compile_program(language, source, max_bound=max_bound, L=maxv, min_bound=min_bound)
+    program = compile_program(
+        language, source, max_bound=max_bound, L=maxv, min_bound=min_bound
+    )
     interesting = False
     elapsed = time.time() - t
     io_pairs = []
     while not interesting and elapsed < timeout:
-        latest_io_pairs = generate_io_pairs(program, num_examples=num_examples, max_bound=max_bound, min_len=min_io_len,
-                                            max_len=max_io_len)
+        latest_io_pairs = generate_io_pairs(
+            program,
+            num_examples=num_examples,
+            max_bound=max_bound,
+            min_len=min_io_len,
+            max_len=max_io_len,
+        )
         io_pairs.extend(latest_io_pairs)
         io_pairs = reduce_io_pairs(io_pairs, num_examples)
         elapsed = time.time() - t

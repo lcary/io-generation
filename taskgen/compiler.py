@@ -7,7 +7,9 @@ def get_language_dict(language):
     return {l.src: l for l in language}
 
 
-def compile_program(language, source_code, max_bound, L, min_input_range_length=0, min_bound=None):
+def compile_program(
+    language, source_code, max_bound, L, min_input_range_length=0, min_bound=None
+):
     """
     Parses a program into an intermediate representation capable of constraints
     checking and execution.
@@ -33,7 +35,7 @@ def compile_program(language, source_code, max_bound, L, min_input_range_length=
             min_input_range_length,
             pointers,
             functions,
-            min_bound=min_bound
+            min_bound=min_bound,
         )
     except PropagationError:
         return None
