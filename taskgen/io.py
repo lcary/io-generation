@@ -77,7 +77,7 @@ def generate_io_pairs(
     return io_pairs
 
 
-def generate_interesting(
+def _generate_interesting(
     source,
     num_examples=5,
     max_bound=512,
@@ -88,8 +88,12 @@ def generate_interesting(
     timeout=5.0,
     language=None,
     min_bound=None,
-    debug=False,
 ):
+    """
+    Compile a program and generate interesting IO pairs.
+    Returns a tuple of program, pairs, and runtime in seconds.
+    """
+
     if language is None:
         language, _ = get_linq_dsl(max_bound, min_bound=min_bound)
 
@@ -114,17 +118,22 @@ def generate_interesting(
         elapsed = time.time() - t
         if is_interesting(io_pairs, min_variance):
             interesting = True
-    if debug:
-        print(("time:", elapsed))
-    print(program)
     if not interesting:
         print("WARN: Timeout hit while finding most io_pairs.")
-    print("io_pairs:")
-    for s in io_pairs:
-        print("    {}".format(s))
-    if debug:
-        print("output variance: ", get_output_variance(get_outputs(io_pairs)))
-    return program, io_pairs
+    return program, io_pairs, elapsed
+
+
+def generate_interesting(*args, **kwargs):
+    """ Generate interesting IO pairs and return output as a dictionary. """
+    program, io_pairs, elapsed = _generate_interesting(*args, **kwargs)
+    var = get_output_variance(get_outputs(io_pairs))
+    d = {
+        "program": program,
+        "io_pairs": io_pairs,
+        "output_variance": var,
+        "runtime_seconds": elapsed
+    }
+    return d
 
 
 def reduce_io_pairs(io_pairs, num_examples):
@@ -159,3 +168,13 @@ def test_io(program, io_pair):
         print("expect: ", io_pair[1])
         print("actual: ", program.fun(io_pair[0]))
         raise e
+
+
+def pretty_print_results(d, margin=7):
+    print("program: ", d['program'].src.replace("\n", " | "))
+    col_width = max(len(str(i)) for row in d['io_pairs'] for i in row) + margin
+    for io_pair in d['io_pairs']:
+        i = str(io_pair[0])
+        o = str(io_pair[1])
+        print("i: " + i.ljust(col_width) + "o: " + o)
+    print()
