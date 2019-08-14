@@ -44,13 +44,27 @@ def compile_program(
     my_pointers = list(pointers)
     my_program_length = program_length
 
-    def program_executor(args):
+    def program_executor(args, debug=False):
         assert len(args) == len(my_input_types)
         registers = [None] * my_program_length
         for t in range(len(args)):
             registers[t] = args[t]
         for t in range(len(args), my_program_length):
-            registers[t] = my_functions[t].fun(*[registers[p] for p in my_pointers[t]])
+            args = [registers[p] for p in my_pointers[t]]
+            func = my_functions[t]
+            if debug:
+                print("DEBUG: func = {}".format(func))
+                print("DEBUG: args = {}".format(args))
+            try:
+                res = func.fun(*args)
+                if debug:
+                    print("DEBUG: res  = {}".format(res))
+            except TypeError as e:
+                print("ERROR: failed to execute program")
+                print("ERROR: func = {}".format(func))
+                print("ERROR: args = {}".format(args))
+                raise e
+            registers[t] = res
         return registers[-1]
 
     return Program(

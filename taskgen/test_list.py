@@ -59,7 +59,7 @@ def test_count_len_in_tail():
     source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
     program, samples = generate_interesting(
         source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
-    )  # TODO: change N to 100
+    )
     sample = (([3, 5, 4, 7, 5],), 2)
     test_sample(sample, program)
     sample = (([5, 4, 7, 5],), 1)
@@ -78,8 +78,68 @@ def test_count_last_in_tail():
     source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
     program, samples = generate_interesting(
         source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
-    )  # TODO: change N to 100
+    )
     sample = (([3, 5, 4, 7, 5],), 2)
+    test_sample(sample, program)
+    return program, samples
+
+
+def test_count_len_tail_in_tail():
+    """
+    count (len (tail xs)) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- len b | d <- count c b"
+    program, samples = generate_interesting(
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
+    )
+    sample = (([3, 5, 4, 7, 5],), 1)
+    test_sample(sample, program)
+    return program, samples
+
+
+def test_count_head_tail_in_tail():
+    """
+    count (head (tail xs)) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- head b | d <- count c b"
+    program, samples = generate_interesting(
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
+    )
+    sample = (([3, 5, 4, 7, 5],), 2)
+    test_sample(sample, program)
+    return program, samples
+
+
+def test_count_last_tail_in_tail():
+    """
+    count (last (tail xs)) (tail xs)
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- last b | d <- count c b"
+    program, samples = generate_interesting(
+        source, N=10, V=V, maxv=10, max_io_len=10, language=language, min_variance=3.5
+    )
+    sample = (([3, 5, 4, 7, 5],), 2)
+    test_sample(sample, program)
+    return program, samples
+
+
+def test_count_head_tail_tail_tail_in_list():
+    """
+    count (head (tail (tail (tail xs)))) xs
+    """
+    V = 512
+    language = get_list_dsl(V)
+    source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
+    program, samples = generate_interesting(
+        source, N=10, V=V, maxv=10, min_io_len=3, max_io_len=10, language=language, min_variance=3.5
+    )
+    sample = (([3, 5, 4, 7, 5],), 1)
     test_sample(sample, program)
     return program, samples
 
@@ -96,6 +156,14 @@ def run_tests():
     program, io_pairs = test_count_len_in_tail()
     verify_io_pairs(io_pairs, in_type=[int], out_type=int)
     program, io_pairs = test_count_last_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_len_tail_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_head_tail_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_last_tail_in_tail()
+    verify_io_pairs(io_pairs, in_type=[int], out_type=int)
+    program, io_pairs = test_count_head_tail_tail_tail_in_list()
     verify_io_pairs(io_pairs, in_type=[int], out_type=int)
 
 

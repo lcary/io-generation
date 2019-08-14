@@ -41,7 +41,7 @@ def is_interesting(samples, min_variance):
     return output_var >= min_variance
 
 
-def generate_mixed_length_io_arrays(
+def generate_io_pairs(
     program, N, V, min_len=1, max_len=10
 ):  # TODO: allow empty lists
     """ Given a programs, randomly generates N IO examples.
@@ -81,6 +81,7 @@ def generate_interesting(
     N=5,
     V=512,
     maxv=10,
+    min_io_len=1,
     max_io_len=10,
     min_variance=1.0,
     timeout=5.0,
@@ -96,8 +97,8 @@ def generate_interesting(
     elapsed = time.time() - t
     samples = []
     while not interesting and elapsed < timeout:
-        latest_samples = generate_mixed_length_io_arrays(
-            program, N=N, V=V, max_len=max_io_len
+        latest_samples = generate_io_pairs(
+            program, N=N, V=V, min_len=min_io_len, max_len=max_io_len
         )
         samples.extend(latest_samples)
         samples = reduce_samples(samples, N)
