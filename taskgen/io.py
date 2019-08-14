@@ -41,9 +41,7 @@ def is_interesting(io_pairs, min_variance):
     return output_var >= min_variance
 
 
-def generate_io_pairs(
-    program, N, V, min_len=1, max_len=10
-):  # TODO: allow empty lists
+def generate_io_pairs(program, N, V, min_len=1, max_len=10):  # TODO: allow empty lists
     """ Given a programs, randomly generates N IO examples.
         using the specified length L for the input arrays. """
     input_types = program.ins

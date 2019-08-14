@@ -146,7 +146,14 @@ def test_count_head_tail_tail_tail_in_list():
     language = get_list_dsl(V)
     source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
     program, io_pairs = generate_interesting(
-        source, N=10, V=V, maxv=10, min_io_len=3, max_io_len=10, language=language, min_variance=3.5
+        source,
+        N=10,
+        V=V,
+        maxv=10,
+        min_io_len=3,
+        max_io_len=10,
+        language=language,
+        min_variance=3.5,
     )
     verify_io_pairs(io_pairs, sig=([int], int))
     io_pair = (([3, 5, 4, 7, 5],), 1)
