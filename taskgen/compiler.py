@@ -36,26 +36,35 @@ def compile_program(language, source_code, V, L, min_input_range_length=0):
     except PropagationError:
         return None
 
-    # Construct executor
-    my_input_types = list(input_types)
-    my_functions = list(functions)
-    my_pointers = list(pointers)
-    my_program_length = program_length
+    program_executor = Executor(input_types, functions, pointers, program_length)
 
-    def program_executor(args, debug=False):
-        assert len(args) == len(my_input_types)
-        registers = [None] * my_program_length
+    return Program(
+        source_code, input_types, types[-1], program_executor, limits[:input_length]
+    )
+
+
+class Executor(object):
+    def __init__(self, input_types, functions, pointers, program_length, debug=False):
+        self.input_types = list(input_types)
+        self.functions = list(functions)
+        self.pointers = list(pointers)
+        self.program_length = program_length
+        self.debug = debug
+
+    def __call__(self, args):
+        assert len(args) == len(self.input_types)
+        registers = [None] * self.program_length
         for t in range(len(args)):
             registers[t] = args[t]
-        for t in range(len(args), my_program_length):
-            args = [registers[p] for p in my_pointers[t]]
-            func = my_functions[t]
-            if debug:
+        for t in range(len(args), self.program_length):
+            args = [registers[p] for p in self.pointers[t]]
+            func = self.functions[t]
+            if self.debug:
                 print("DEBUG: func = {}".format(func))
                 print("DEBUG: args = {}".format(args))
             try:
                 res = func.fun(*args)
-                if debug:
+                if self.debug:
                     print("DEBUG: res  = {}".format(res))
             except TypeError as e:
                 print("ERROR: failed to execute program")
@@ -64,10 +73,6 @@ def compile_program(language, source_code, V, L, min_input_range_length=0):
                 raise e
             registers[t] = res
         return registers[-1]
-
-    return Program(
-        source_code, input_types, types[-1], program_executor, limits[:input_length]
-    )
 
 
 def parse_source(language, source_code):
