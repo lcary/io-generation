@@ -38,8 +38,10 @@ def scanl1_bounds(l, A, B, L):
         raise Exception("Unsupported SCANL1 lambda, cannot compute valid input bounds.")
 
 
-def get_linq_dsl(V):
-    Null = V
+def get_linq_dsl(max_bound, min_bound=None):
+    if min_bound is None:
+        min_bound = -max_bound
+    Null = max_bound
     lambdas = [
         Function("IDT", (int, int), lambda i: i, lambda A_B: [(A_B[0], A_B[1])]),
         Function(
@@ -211,7 +213,7 @@ def get_linq_dsl(V):
                 "COUNT " + l.src,
                 ([int], int),
                 lambda xs, l=l: len(list(filter(l.fun, xs))),
-                lambda b, l=l: [(-V, V)],
+                lambda b, l=l: [(min_bound, max_bound)],
             )
             for l in lambdas
             if l.sig == (int, bool)

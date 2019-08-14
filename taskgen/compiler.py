@@ -7,7 +7,7 @@ def get_language_dict(language):
     return {l.src: l for l in language}
 
 
-def compile_program(language, source_code, V, L, min_input_range_length=0):
+def compile_program(language, source_code, max_bound, L, min_input_range_length=0, min_bound=None):
     """
     Parses a program into an intermediate representation capable of constraints
     checking and execution.
@@ -15,8 +15,9 @@ def compile_program(language, source_code, V, L, min_input_range_length=0):
     Args:
         - language: a DSL used to parse the tokens in a program
         - source_code: string of source that will be parsed
-        - V: range of values allowed as integer range
+        - max_bound: max value allowed as integer
         - L: "tape lengths"  # TODO: improve this definition
+        - min_bound: min value allowed as integer (default: -max_bound)
     """
     functions, input_types, pointers, types = parse_source(language, source_code)
     input_length = len(input_types)
@@ -25,13 +26,14 @@ def compile_program(language, source_code, V, L, min_input_range_length=0):
     try:
         limits = propagate_constraints(
             source_code,
-            V,
+            max_bound,
             L,
             program_length,
             input_length,
             min_input_range_length,
             pointers,
             functions,
+            min_bound=min_bound
         )
     except PropagationError:
         return None
@@ -112,19 +114,22 @@ class PropagationError(Exception):
 
 def propagate_constraints(
     source_code,
-    V,
+    max_bound,
     L,
     program_length,
     input_length,
     min_input_range_length,
     pointers,
     functions,
+    min_bound=None,
 ):
     """
     Validate program by propagating input constraints and checking
-    that all registers are useful/
+    that all registers are useful.
     """
-    limits = [(-V, V)] * program_length
+    if min_bound is None:
+        min_bound = -max_bound
+    limits = [(min_bound, max_bound)] * program_length
     if L is None:
         return limits
     for t in range(program_length - 1, -1, -1):

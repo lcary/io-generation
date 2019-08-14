@@ -1,8 +1,8 @@
 from taskgen.dsl.types import Function
 
 
-def get_list_dsl(V):
-    Null = V
+def get_list_dsl(max_bound, min_bound=None):
+    Null = max_bound
     return [
         Function(
             "head",

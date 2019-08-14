@@ -41,15 +41,16 @@ def is_interesting(io_pairs, min_variance):
     return output_var >= min_variance
 
 
-def generate_io_pairs(program, N, V, min_len=1, max_len=10):  # TODO: allow empty lists
-    """ Given a programs, randomly generates N IO examples.
-        using the specified length L for the input arrays. """
+def generate_io_pairs(program, num_examples, max_bound, min_len=1, max_len=10):  # TODO: allow empty lists
+    """
+    Given a program, randomly generates N input-output examples according to constraints.
+    If an argument type or value in an argument is an integer, pick a random int within bounds.
+    If an argument type is a list, randomize the list length according to min/max parameters.
+    """
     input_types = program.ins
     input_nargs = len(input_types)
-
-    # Generate N input-output pairs
-    IO = []
-    for _ in range(N):
+    io_pairs = []
+    for _ in range(num_examples):
         input_value = [None] * input_nargs
         for a in range(input_nargs):
             minv, maxv = program.bounds[a]
@@ -65,62 +66,54 @@ def generate_io_pairs(program, N, V, min_len=1, max_len=10):  # TODO: allow empt
                     + " for random input generation"
                 )
         output_value = program.fun(input_value)
-        IO.append((input_value, output_value))
+        io_pairs.append((input_value, output_value))
         assert (
-            (program.out == int and output_value <= V)
+            (program.out == int and output_value <= max_bound)
             or (program.out == [int] and len(output_value) == 0)
-            or (program.out == [int] and max(output_value) <= V)
+            or (program.out == [int] and max(output_value) <= max_bound)
         )
-    return IO
+    return io_pairs
 
 
-def generate_interesting(
-    source,
-    N=5,
-    V=512,
-    maxv=10,
-    min_io_len=1,
-    max_io_len=10,
-    min_variance=1.0,
-    timeout=5.0,
-    language=None,
-):
+def generate_interesting(source, num_examples=5, max_bound=512, maxv=10, min_io_len=1, max_io_len=10, min_variance=1.0,
+                         timeout=5.0, language=None, min_bound=None, debug=False):
     if language is None:
-        language, _ = get_linq_dsl(V)
+        language, _ = get_linq_dsl(max_bound, min_bound=min_bound)
 
     t = time.time()
     source = source.replace(" | ", "\n")
-    program = compile_program(language, source, V=V, L=maxv)
+    program = compile_program(language, source, max_bound=max_bound, L=maxv, min_bound=min_bound)
     interesting = False
     elapsed = time.time() - t
     io_pairs = []
     while not interesting and elapsed < timeout:
-        latest_io_pairs = generate_io_pairs(
-            program, N=N, V=V, min_len=min_io_len, max_len=max_io_len
-        )
+        latest_io_pairs = generate_io_pairs(program, num_examples=num_examples, max_bound=max_bound, min_len=min_io_len,
+                                            max_len=max_io_len)
         io_pairs.extend(latest_io_pairs)
-        io_pairs = reduce_io_pairs(io_pairs, N)
+        io_pairs = reduce_io_pairs(io_pairs, num_examples)
         elapsed = time.time() - t
         if is_interesting(io_pairs, min_variance):
             interesting = True
-    print(("time:", elapsed))
+    if debug:
+        print(("time:", elapsed))
     print(program)
     if not interesting:
         print("WARN: Timeout hit while finding most io_pairs.")
     print("io_pairs:")
     for s in io_pairs:
         print("    {}".format(s))
-    print("output variance: ", get_output_variance(get_outputs(io_pairs)))
+    if debug:
+        print("output variance: ", get_output_variance(get_outputs(io_pairs)))
     return program, io_pairs
 
 
-def reduce_io_pairs(io_pairs, N):
+def reduce_io_pairs(io_pairs, num_examples):
     remove_indices = find_duplicates(io_pairs)
-    max_remove = len(io_pairs) - N
+    max_remove = len(io_pairs) - num_examples
     remove_indices = remove_indices[:max_remove]
     io_pairs = [s for i, s in enumerate(io_pairs) if i not in remove_indices]
     # truncate list to handle case of no duplicates
-    io_pairs = io_pairs[:N]
+    io_pairs = io_pairs[:num_examples]
     return io_pairs
 
 
