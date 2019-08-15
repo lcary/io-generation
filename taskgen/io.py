@@ -164,7 +164,7 @@ def generate_io_pairs(
     return io_pairs
 
 
-def _generate_interesting(
+def generate_interesting(
     source,
     num_examples=5,
     max_bound=512,
@@ -177,8 +177,8 @@ def _generate_interesting(
     min_bound=None,
 ):
     """
-    Compile a program and generate interesting IO pairs.
-    Returns a tuple of program, pairs, and runtime in seconds.
+    Compile a program and generates interesting IO pairs.
+    Returns output as a dictionary.
     """
 
     if language is None:
@@ -189,10 +189,13 @@ def _generate_interesting(
     program = compile_program(
         language, source, max_bound=max_bound, L=maxv, min_bound=min_bound
     )
+
     interesting = False
+    hit_timeout = False
     elapsed = time.time() - t
     io_pairs = []
-    while not interesting and elapsed < timeout:
+
+    while not interesting and not hit_timeout:
         latest_io_pairs = generate_io_pairs(
             program,
             num_examples=num_examples,
@@ -202,25 +205,24 @@ def _generate_interesting(
         )
         io_pairs.extend(latest_io_pairs)
         io_pairs = reduce_io_pairs(io_pairs, num_examples)
-        elapsed = time.time() - t
         if is_interesting(io_pairs, min_variance):
             interesting = True
-    if not interesting:
-        print("WARN: Timeout hit while finding most interesting io_pairs.")
-    return program, io_pairs, elapsed
+        elapsed = time.time() - t
+        if elapsed > timeout:
+            hit_timeout = True
+
+    return format_examples(program, io_pairs, elapsed, timeout, hit_timeout)
 
 
-def generate_interesting(*args, **kwargs):
-    """ Generate interesting IO pairs and return output as a dictionary. """
-    program, io_pairs, elapsed = _generate_interesting(*args, **kwargs)
-    var = get_output_variance(get_outputs(io_pairs))
-    d = {
+def format_examples(program, io_pairs, elapsed, timeout, hit_timeout):
+    return {
         "program": program,
         "io_pairs": [{"i": i, "o": o} for (i, o) in io_pairs],
-        "output_variance": var,
+        "output_variance": get_output_variance(get_outputs(io_pairs)),
         "runtime_seconds": elapsed,
+        "timeout": timeout,
+        "hit_timeout": hit_timeout,
     }
-    return d
 
 
 def reduce_io_pairs(io_pairs, num_examples):
@@ -277,6 +279,8 @@ def pretty_print_results(d, margin=7, debug=False):
         i = str(io_pair["i"])
         o = str(io_pair["o"])
         print("i: " + i.ljust(col_width) + "o: " + o)
+    if d['hit_timeout']:
+        print("WARN: Timeout hit while finding most interesting io_pairs for above program.")
     if debug:
         print(
             (

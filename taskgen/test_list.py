@@ -54,9 +54,17 @@ def generate_examples(*args, **kwargs):
 
 
 def test_linq_sum_top_index_sorted(args):
+    max_bound = 512
+    min_bound = None
     source = "a <- int | b <- [int] | c <- SORT b | d <- TAKE a c | e <- SUM d"
-    language, _ = get_linq_dsl(512)
-    d = generate_interesting(source, max_bound=512, min_bound=None, language=language)
+    language, _ = get_linq_dsl(max_bound)
+    d = generate_examples(
+        source,
+        max_bound=max_bound,
+        min_bound=min_bound,
+        language=language,
+        cli_args=args,
+    )
     verify_types(d["io_pairs"], sig=([int, [int]], int))
     test_io(d["program"], ((2, [3, 5, 4, 7, 5]), 7))
     return d
@@ -197,7 +205,7 @@ def run_tests():
     ]
 
     results = []
-    for t in tqdm(tasks):
+    for t in tqdm(tasks, miniters=1, mininterval=0.000001):
         r = t(args)
         results.append(r)
 
