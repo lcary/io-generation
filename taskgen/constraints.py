@@ -58,7 +58,9 @@ def verify_types(io_pairs, sig):
         )
         raise e
 
-    for i, o in io_pairs:
+    for pair in io_pairs:
+        i = pair["i"]
+        o = pair["o"]
         try:
             verify_input_type(i, in_type)
         except AssertionError as e:

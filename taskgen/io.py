@@ -76,7 +76,7 @@ def biased_randint(minv, maxv, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
         return np.random.randint(minv, maxv)
     probs = get_biased_probabilities(minv, maxv, bias_max, bias_amount)
     res = np.random.multinomial(1, probs)
-    return np.argmax(res)
+    return np.argmax(res).item()
 
 
 def biased_randint_list(
@@ -104,7 +104,7 @@ def biased_randint_list(
         bias=0.99:  0.9174999999999999
     """
     if maxv <= bias_max or minv >= bias_max:
-        return list(np.random.randint(minv, maxv, size=array_size))
+        return [i.item() for i in np.random.randint(minv, maxv, size=array_size)]
     probs = get_biased_probabilities(minv, maxv, bias_max, bias_amount)
     res = np.random.multinomial(array_size, probs, size=1)
     vals = []
@@ -216,7 +216,7 @@ def generate_interesting(*args, **kwargs):
     var = get_output_variance(get_outputs(io_pairs))
     d = {
         "program": program,
-        "io_pairs": io_pairs,
+        "io_pairs": [{"i": i, "o": o} for (i, o) in io_pairs],
         "output_variance": var,
         "runtime_seconds": elapsed,
     }
@@ -271,10 +271,11 @@ def test_io(program, io_pair):
 
 def pretty_print_results(d, margin=7, debug=False):
     print("program: ", d["program"].src.replace("\n", " | "))
-    col_width = max(len(str(i)) for row in d["io_pairs"] for i in row) + margin
+    inputs = [v for pair in d["io_pairs"] for k, v in pair.items() if k == "i"]
+    col_width = max(len(str(v)) for v in inputs) + margin
     for io_pair in d["io_pairs"]:
-        i = str(io_pair[0])
-        o = str(io_pair[1])
+        i = str(io_pair["i"])
+        o = str(io_pair["o"])
         print("i: " + i.ljust(col_width) + "o: " + o)
     if debug:
         print(

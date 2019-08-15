@@ -1,18 +1,43 @@
 import argparse
+import json
+import os
 
+from tqdm import tqdm
+
+from taskgen.compiler import Program
 from taskgen.constraints import verify_types
 from taskgen.dsl.linq import get_linq_dsl
 from taskgen.dsl.simple import get_list_dsl
 from taskgen.io import generate_interesting, test_io, pretty_print_results
 
 DEFAULT_MAXV = 99
+DEFAULT_JSON_FILE = "ioexamples.json"
+
+
+def _serialize_programs(d):
+    """ Serialize Program objects to strings, so data is JSON serializable. """
+    newd = []
+    for i in d:
+        newi = {}
+        for k, v in i.items():
+            if k == "program" and isinstance(v, Program):
+                v = v.src.replace("\n", " | ")
+            newi[k] = v
+        newd.append(newi)
+    return newd
+
+
+def write_json(d, json_filepath):
+    d = _serialize_programs(d)
+    with open(json_filepath, "w") as f:
+        json.dump(d, f)
 
 
 def generate_examples(*args, **kwargs):
     """
     Run IO generation with defaults and pretty print the results.
     """
-    cli_args = kwargs.pop('cli_args')
+    cli_args = kwargs.pop("cli_args")
     kwargs.update(
         {
             "num_examples": kwargs.get("num_examples", cli_args.num_examples),
@@ -25,9 +50,7 @@ def generate_examples(*args, **kwargs):
         }
     )
     kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
-    d = generate_interesting(*args, **kwargs)
-    pretty_print_results(d)
-    return d
+    return generate_interesting(*args, **kwargs)
 
 
 def test_linq_sum_top_index_sorted(args):
@@ -36,6 +59,7 @@ def test_linq_sum_top_index_sorted(args):
     d = generate_interesting(source, max_bound=512, min_bound=None, language=language)
     verify_types(d["io_pairs"], sig=([int, [int]], int))
     test_io(d["program"], ((2, [3, 5, 4, 7, 5]), 7))
+    return d
 
 
 def test_list_head(args):
@@ -43,6 +67,7 @@ def test_list_head(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 3))
+    return d
 
 
 def test_list_tail(args):
@@ -50,6 +75,7 @@ def test_list_tail(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], [int]))
     test_io(d["program"], (([3, 5, 4, 7, 5],), [5, 4, 7, 5]))
+    return d
 
 
 def test_list_count_head_in_tail(args):
@@ -62,6 +88,7 @@ def test_list_count_head_in_tail(args):
     test_io(d["program"], (([3, 5, 4, 7, 5],), 0))
     test_io(d["program"], (([5, 4, 7, 5],), 1))
     test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 3))
+    return d
 
 
 def test_list_count_len_in_tail(args):
@@ -74,6 +101,7 @@ def test_list_count_len_in_tail(args):
     test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
     test_io(d["program"], (([5, 4, 7, 5],), 1))
     test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0))
+    return d
 
 
 def test_list_count_last_in_tail(args):
@@ -84,6 +112,7 @@ def test_list_count_last_in_tail(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+    return d
 
 
 def test_list_count_len_tail_in_tail(args):
@@ -94,6 +123,7 @@ def test_list_count_len_tail_in_tail(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
+    return d
 
 
 def test_list_count_head_tail_in_tail(args):
@@ -104,6 +134,7 @@ def test_list_count_head_tail_in_tail(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+    return d
 
 
 def test_list_count_last_tail_in_tail(args):
@@ -114,6 +145,7 @@ def test_list_count_last_tail_in_tail(args):
     d = generate_examples(source, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+    return d
 
 
 def test_list_count_head_tail_tail_tail(args):
@@ -124,6 +156,7 @@ def test_list_count_head_tail_tail_tail(args):
     d = generate_examples(source, min_io_len=3, cli_args=args)
     verify_types(d["io_pairs"], sig=([int], int))
     test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
+    return d
 
 
 def test_list_count_n(args):
@@ -131,6 +164,7 @@ def test_list_count_n(args):
     d = generate_examples(source, min_variance=3.5, cli_args=args)
     verify_types(d["io_pairs"], sig=([int, [int]], int))
     test_io(d["program"], ((3, [3, 5, 4, 7, 5]), 1))
+    return d
 
 
 def run_tests():
@@ -142,19 +176,39 @@ def run_tests():
     parser.add_argument("--min-variance", type=float, default=3.5)
     parser.add_argument("--maxv", type=int, default=DEFAULT_MAXV)  # max value in list
     parser.add_argument("--max-io-len", type=int, default=10)
+    parser.add_argument("--json", action="store_true", default=False)
+    parser.add_argument("--json-filepath", default=DEFAULT_JSON_FILE)
     args = parser.parse_args()
 
-    test_linq_sum_top_index_sorted(args)
-    test_list_head(args)
-    test_list_tail(args)
-    test_list_count_head_in_tail(args)
-    test_list_count_len_in_tail(args)
-    test_list_count_last_in_tail(args)
-    test_list_count_len_tail_in_tail(args)
-    test_list_count_head_tail_in_tail(args)
-    test_list_count_last_tail_in_tail(args)
-    test_list_count_head_tail_tail_tail(args)
-    test_list_count_n(args)
+    args.json_filepath = os.path.abspath(args.json_filepath)
+
+    tasks = [
+        test_linq_sum_top_index_sorted,
+        test_list_head,
+        test_list_tail,
+        test_list_count_head_in_tail,
+        test_list_count_len_in_tail,
+        test_list_count_last_in_tail,
+        test_list_count_len_tail_in_tail,
+        test_list_count_head_tail_in_tail,
+        test_list_count_last_tail_in_tail,
+        test_list_count_head_tail_tail_tail,
+        test_list_count_n,
+    ]
+
+    results = []
+    for t in tqdm(tasks):
+        r = t(args)
+        results.append(r)
+
+    if args.json:
+        write_json(results, args.json_filepath)
+    else:
+        for d in results:
+            pretty_print_results(d)
+
+    if args.json:
+        print(args.json_filepath)
 
 
 if __name__ == "__main__":
