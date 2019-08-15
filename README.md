@@ -6,7 +6,7 @@ A tool to return interesting, randomized input-output (IO) examples for learning
 Strategy
 --------
 
-Strategy: attempts to construct useful IO examples using a constraint propagation technique from the DeepCoder paper (https://arxiv.org/abs/1611.01989), as well as maximizing output variance via de-duplication.
+Constructs IO examples using a constraint propagation technique from the [DeepCoder](https://arxiv.org/abs/1611.01989) paper, as well as maximizing output variance via de-duplication. The goal is to increase the entropy of the inputs and outputs in each set of IO pairs for a task. For example, if a task is to learn a counting function from a bunch of input-output examples, it's impossible to learn it if all of the output values are equal to zero.
 
 Usage
 -----
