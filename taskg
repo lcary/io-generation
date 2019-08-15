@@ -2,4 +2,4 @@
 set -e
 # Ensure tests are run from project root
 cd "$( dirname "${BASH_SOURCE[0]}" )"
-python -m taskgen.test_list
+python -m taskgen.test_list "$@"
