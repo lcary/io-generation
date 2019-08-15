@@ -43,7 +43,7 @@ def is_interesting(io_pairs, min_variance):
 
 
 BIAS_MAX = 10
-BIAS_AMOUNT = 0.97
+BIAS_AMOUNT = 0.98
 
 
 def biased_randint(minv, maxv, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
@@ -78,7 +78,9 @@ def biased_randint(minv, maxv, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
     return np.argmax(res)
 
 
-def biased_randint_list(minv, maxv, array_size, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
+def biased_randint_list(
+    minv, maxv, array_size, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT
+):
     """
     Similar to biased_randint but for lists of ints.
 
@@ -215,7 +217,7 @@ def generate_interesting(*args, **kwargs):
         "program": program,
         "io_pairs": io_pairs,
         "output_variance": var,
-        "runtime_seconds": elapsed
+        "runtime_seconds": elapsed,
     }
     return d
 
@@ -255,12 +257,19 @@ def test_io(program, io_pair):
 
 
 def pretty_print_results(d, margin=7, debug=False):
-    print("program: ", d['program'].src.replace("\n", " | "))
-    col_width = max(len(str(i)) for row in d['io_pairs'] for i in row) + margin
-    for io_pair in d['io_pairs']:
+    print("program: ", d["program"].src.replace("\n", " | "))
+    col_width = max(len(str(i)) for row in d["io_pairs"] for i in row) + margin
+    for io_pair in d["io_pairs"]:
         i = str(io_pair[0])
         o = str(io_pair[1])
         print("i: " + i.ljust(col_width) + "o: " + o)
     if debug:
-        print(("output variance: ", d['output_variance'], "runtime (seconds): ", d['runtime_seconds']))
+        print(
+            (
+                "output variance: ",
+                d["output_variance"],
+                "runtime (seconds): ",
+                d["runtime_seconds"],
+            )
+        )
     print()

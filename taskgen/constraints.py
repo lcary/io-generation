@@ -53,7 +53,9 @@ def verify_types(io_pairs, sig):
     try:
         in_type, out_type = sig
     except (TypeError, ValueError) as e:
-        print("ERROR: unable to unpack input/output type from signature ({})".format(sig))
+        print(
+            "ERROR: unable to unpack input/output type from signature ({})".format(sig)
+        )
         raise e
 
     for i, o in io_pairs:
