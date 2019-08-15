@@ -7,7 +7,6 @@ from tqdm import tqdm
 
 from taskgen.compiler import compile_program
 from taskgen.constraints import is_int
-from taskgen.dsl.linq import get_linq_dsl
 
 
 def get_inputs(io_pairs):
@@ -166,6 +165,7 @@ def generate_io_pairs(
 
 
 def generate_interesting(
+    language,
     source,
     num_examples=5,
     max_bound=512,
@@ -174,17 +174,12 @@ def generate_interesting(
     max_io_len=10,
     min_variance=1.0,
     timeout=5.0,
-    language=None,
     min_bound=None,
 ):
     """
     Compile a program and generates interesting IO pairs.
     Returns output as a dictionary.
     """
-
-    if language is None:
-        language, _ = get_linq_dsl(max_bound, min_bound=min_bound)
-
     t = time.time()
     source = source.replace(" | ", "\n")
     program = compile_program(

@@ -6,6 +6,7 @@ import sys
 from tqdm import trange
 
 from taskgen.compiler import Program
+from taskgen.dsl.linq import get_linq_dsl
 from taskgen.dsl.simple import get_list_dsl
 from taskgen.io import generate_interesting, pretty_print_results
 
@@ -48,8 +49,8 @@ def generate_examples(*args, **kwargs):
             "max_io_len": kwargs.get("max_io_len", cli_args.max_io_len),
         }
     )
-    kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
-    return generate_interesting(*args, **kwargs)
+    language = kwargs.get("language", cli_args.language(kwargs))
+    return generate_interesting(language, *args, **kwargs)
 
 
 def get_stock_tasks():
@@ -150,6 +151,20 @@ def print_output(args, results):
         print(args.to_json)
 
 
+def get_language_func(choice):
+    if choice == "simplelist":
+        def f(kwargs):
+            return get_list_dsl(kwargs["max_bound"])
+        return f
+    elif choice == "linq":
+        def f(kwargs):
+            language, _ = get_linq_dsl(kwargs["max_bound"], min_bound=kwargs["min_bound"])
+            return language
+        return f
+    else:
+        raise ValueError("Language type ({}) not recognized.".format(choice))
+
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-examples", type=int, default=10)
@@ -161,12 +176,14 @@ def get_args():
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)
+    parser.add_argument("--language", choices=["simplelist", "linq"], default="simplelist")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--stdin", action="store_true")
     group.add_argument("--from-json", nargs="*")
     group.add_argument("--from-txt", nargs="*")
     args = parser.parse_args()
     args.to_json = os.path.abspath(args.to_json)
+    args.language = get_language_func(args.language)
     return args
 
 

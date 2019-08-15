@@ -18,17 +18,18 @@ def generate_examples(*args, **kwargs):
             "max_io_len": kwargs.get("max_io_len", 10),
         }
     )
-    kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
-    return generate_interesting(*args, **kwargs)
+    language = get_list_dsl(kwargs["max_bound"])
+    return generate_interesting(language, *args, **kwargs)
 
 
 class TestLinqDSL(unittest.TestCase):
     def test_linq_sum_top_index_sorted(self):
         max_bound = 512
         min_bound = None
+        language, _ = get_linq_dsl(max_bound=max_bound, min_bound=min_bound)
         source = "a <- int | b <- [int] | c <- SORT b | d <- TAKE a c | e <- SUM d"
-        language, _ = get_linq_dsl(max_bound)
-        d = generate_examples(
+        d = generate_interesting(
+            language,
             source,
             num_examples=10,
             timeout=10,
@@ -37,7 +38,6 @@ class TestLinqDSL(unittest.TestCase):
             min_variance=3.5,
             maxv=10,
             max_io_len=10,
-            language=language,
         )
         verify_types(d["io_pairs"], sig=([int, [int]], int))
         test_io(d["program"], ((2, [3, 5, 4, 7, 5]), 7))

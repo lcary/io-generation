@@ -17,8 +17,8 @@ def generate_examples(*args, **kwargs):
             "max_io_len": kwargs.get("max_io_len", 10),
         }
     )
-    kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
-    return generate_interesting(*args, **kwargs)
+    language = get_list_dsl(kwargs["max_bound"])
+    return generate_interesting(language, *args, **kwargs)
 
 
 class TestListDSL(unittest.TestCase):
