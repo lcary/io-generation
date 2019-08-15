@@ -11,7 +11,7 @@ from taskgen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
 DEFAULT_OUTPUT_JSON = "io.json"
-LANG_CHOICES = ("simplelist", "linq")
+LANG_CHOICES = ("simplelist", "linq", "extended")
 
 
 def _serialize_programs(d):
