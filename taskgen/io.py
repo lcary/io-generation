@@ -1,5 +1,6 @@
 import random
 import time
+from collections import Counter
 
 import numpy as np
 
@@ -232,16 +233,28 @@ def reduce_io_pairs(io_pairs, num_examples):
     return io_pairs
 
 
+def occurs_frequently(counter, val):
+    avg = sum(counter.values()) / float(len(counter))
+    return counter[val] > avg
+
+
 def find_duplicates(io_pairs):
-    seen = set()
+    """
+    Returns a list of indices for duplicate output values, where indices at the beginning of the
+    list are for outputs that appear as duplicates more frequently than outputs for indices at
+    the end of the list.
+    """
+    seen = Counter()
     remove_indices = []
     for (index, pair) in enumerate(io_pairs):
         o = str(pair[1])
         if o in seen:
-            remove_indices.append(index)
-            continue
-        else:
-            seen.add(o)
+            if occurs_frequently(seen, o):
+                # remove this first, since it's so common
+                remove_indices.insert(0, index)
+            else:
+                remove_indices.append(index)
+        seen[o] += 1
     return remove_indices
 
 
