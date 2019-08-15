@@ -1,7 +1,7 @@
 task-generation
 ===============
 
-A tool to return interesting, randomized input-output (IO) examples for learning list routines.
+A tool to generate random input-output (IO) examples for learning list routines.
 
 Strategy
 --------
