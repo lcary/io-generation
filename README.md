@@ -11,7 +11,7 @@ Constructs IO examples using a constraint propagation technique from the [DeepCo
 Usage
 -----
 
-This program requires Python 3 and that you run `pip install -r requirements`.
+This program requires Python 3 and the pip requirements installed by `pip install -r requirements.txt`.
 
 Generated IO examples will by default be output to the console. Demo:
 ```
