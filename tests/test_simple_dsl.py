@@ -12,7 +12,7 @@ def generate_examples(*args, **kwargs):
             "timeout": kwargs.get("timeout", 10),
             "min_bound": kwargs.get("min_bound", 0),
             "max_bound": kwargs.get("max_bound", 10),
-            "min_variance": kwargs.get("min_variance", 3.5),
+            "min_variance": kwargs.get("min_variance", 1.0),
             "maxv": kwargs.get("maxv", 10),
             "max_io_len": kwargs.get("max_io_len", 10),
         }

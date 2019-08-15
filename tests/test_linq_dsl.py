@@ -13,7 +13,7 @@ def generate_examples(*args, **kwargs):
             "timeout": kwargs.get("timeout", 10),
             "min_bound": kwargs.get("min_bound", 0),
             "max_bound": kwargs.get("max_bound", 10),
-            "min_variance": kwargs.get("min_variance", 3.5),
+            "min_variance": kwargs.get("min_variance", 1.0),
             "maxv": kwargs.get("maxv", 10),
             "max_io_len": kwargs.get("max_io_len", 10),
         }
@@ -39,8 +39,10 @@ class TestLinqDSL(unittest.TestCase):
             maxv=10,
             max_io_len=10,
         )
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int, [int]], int))
-        test_io(d["program"], ((2, [3, 5, 4, 7, 5]), 7))
+        test_io(program, ((2, [3, 5, 4, 7, 5]), 7))
+        self.assertEqual(program.bounds, [(0, 10), (-50, 51)])
 
 
 if __name__ == "__main__":
