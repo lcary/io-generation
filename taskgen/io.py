@@ -206,7 +206,7 @@ def _generate_interesting(
         if is_interesting(io_pairs, min_variance):
             interesting = True
     if not interesting:
-        print("WARN: Timeout hit while finding most io_pairs.")
+        print("WARN: Timeout hit while finding most interesting io_pairs.")
     return program, io_pairs, elapsed
 
 
