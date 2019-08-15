@@ -25,14 +25,18 @@ class TestListDSL(unittest.TestCase):
     def test_list_head(self):
         source = "a <- [int] | b <- head a"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 3))
+        test_io(program, (([3, 5, 4, 7, 5],), 3))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_tail(self):
         source = "a <- [int] | b <- tail a"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], [int]))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), [5, 4, 7, 5]))
+        test_io(program, (([3, 5, 4, 7, 5],), [5, 4, 7, 5]))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_head_in_tail(self):
         """
@@ -40,10 +44,12 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 0))
-        test_io(d["program"], (([5, 4, 7, 5],), 1))
-        test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 3))
+        test_io(program, (([3, 5, 4, 7, 5],), 0))
+        test_io(program, (([5, 4, 7, 5],), 1))
+        test_io(program, (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 3))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_len_in_tail(self):
         """
@@ -51,10 +57,12 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
-        test_io(d["program"], (([5, 4, 7, 5],), 1))
-        test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0))
+        test_io(program, (([3, 5, 4, 7, 5],), 2))
+        test_io(program, (([5, 4, 7, 5],), 1))
+        test_io(program, (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_last_in_tail(self):
         """
@@ -62,8 +70,10 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+        test_io(program, (([3, 5, 4, 7, 5],), 2))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_len_tail_in_tail(self):
         """
@@ -71,8 +81,10 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- len b | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
+        test_io(program, (([3, 5, 4, 7, 5],), 1))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_head_tail_in_tail(self):
         """
@@ -80,8 +92,10 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- head b | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+        test_io(program, (([3, 5, 4, 7, 5],), 2))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_last_tail_in_tail(self):
         """
@@ -89,8 +103,10 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- last b | d <- count c b"
         d = generate_examples(source)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
+        test_io(program, (([3, 5, 4, 7, 5],), 2))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_head_tail_tail_tail(self):
         """
@@ -98,14 +114,18 @@ class TestListDSL(unittest.TestCase):
         """
         source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
         d = generate_examples(source, min_io_len=3)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
-        test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
+        test_io(program, (([3, 5, 4, 7, 5],), 1))
+        self.assertEqual(program.bounds, [(0, 10)])
 
     def test_list_count_n(self):
         source = "a <- int | b <- [int] | c <- count a b"
         d = generate_examples(source, min_variance=3.5)
+        program = d["program"]
         verify_types(d["io_pairs"], sig=([int, [int]], int))
-        test_io(d["program"], ((3, [3, 5, 4, 7, 5]), 1))
+        test_io(program, ((3, [3, 5, 4, 7, 5]), 1))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
 
     def test_fail_bad_min_bound(self):
         source = "a <- [int] | b <- head a"
