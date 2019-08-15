@@ -5,10 +5,8 @@ import os
 from tqdm import trange
 
 from taskgen.compiler import Program
-from taskgen.constraints import verify_types
-from taskgen.dsl.linq import get_linq_dsl
 from taskgen.dsl.simple import get_list_dsl
-from taskgen.io import generate_interesting, test_io, pretty_print_results
+from taskgen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
 DEFAULT_JSON_FILE = "ioexamples.json"
@@ -53,131 +51,33 @@ def generate_examples(*args, **kwargs):
     return generate_interesting(*args, **kwargs)
 
 
-def test_linq_sum_top_index_sorted(args):
-    max_bound = 512
-    min_bound = None
-    source = "a <- int | b <- [int] | c <- SORT b | d <- TAKE a c | e <- SUM d"
-    language, _ = get_linq_dsl(max_bound)
-    d = generate_examples(
-        source,
-        max_bound=max_bound,
-        min_bound=min_bound,
-        language=language,
-        cli_args=args,
-    )
-    verify_types(d["io_pairs"], sig=([int, [int]], int))
-    test_io(d["program"], ((2, [3, 5, 4, 7, 5]), 7))
-    return d
-
-
-def test_list_head(args):
-    source = "a <- [int] | b <- head a"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 3))
-    return d
-
-
-def test_list_tail(args):
-    source = "a <- [int] | b <- tail a"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], [int]))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), [5, 4, 7, 5]))
-    return d
-
-
-def test_list_count_head_in_tail(args):
-    """
-    count (head xs) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 0))
-    test_io(d["program"], (([5, 4, 7, 5],), 1))
-    test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 3))
-    return d
-
-
-def test_list_count_len_in_tail(args):
-    """
-    count (len xs) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
-    test_io(d["program"], (([5, 4, 7, 5],), 1))
-    test_io(d["program"], (([7, 4, 7, 8, 21, 1, 7, 2, 7, 5],), 0))
-    return d
-
-
-def test_list_count_last_in_tail(args):
-    """
-    count (last xs) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
-    return d
-
-
-def test_list_count_len_tail_in_tail(args):
-    """
-    count (len (tail xs)) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- len b | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
-    return d
-
-
-def test_list_count_head_tail_in_tail(args):
-    """
-    count (head (tail xs)) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- head b | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
-    return d
-
-
-def test_list_count_last_tail_in_tail(args):
-    """
-    count (last (tail xs)) (tail xs)
-    """
-    source = "a <- [int] | b <- tail a | c <- last b | d <- count c b"
-    d = generate_examples(source, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 2))
-    return d
-
-
-def test_list_count_head_tail_tail_tail(args):
-    """
-    count (head (tail (tail (tail xs)))) xs
-    """
-    source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
-    d = generate_examples(source, min_io_len=3, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int], int))
-    test_io(d["program"], (([3, 5, 4, 7, 5],), 1))
-    return d
-
-
-def test_list_count_n(args):
-    source = "a <- int | b <- [int] | c <- count a b"
-    d = generate_examples(source, min_variance=3.5, cli_args=args)
-    verify_types(d["io_pairs"], sig=([int, [int]], int))
-    test_io(d["program"], ((3, [3, 5, 4, 7, 5]), 1))
-    return d
+def get_stock_tasks():
+    return [
+        {"source": "a <- [int] | b <- head a"},
+        {"source": "a <- [int] | b <- tail a"},
+        {"source": "a <- [int] | b <- tail a | c <- head a | d <- count c b"},
+        {"source": "a <- [int] | b <- tail a | c <- len a | d <- count c b"},
+        {"source": "a <- [int] | b <- tail a | c <- last a | d <- count c b"},
+        {"source": "a <- [int] | b <- tail a | c <- len b | d <- count c b"},
+        {"source": "a <- [int] | b <- tail a | c <- head b | d <- count c b"},
+        {"source": "a <- [int] | b <- tail a | c <- last b | d <- count c b"},
+        {"source": "a <- int | b <- [int] | c <- count a b"},
+        {
+            "source": "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a",
+            "kwargs": {"min_io_len": 3},
+        },
+    ]
 
 
 def progress(tasks):
     # A low mininterval setting is used to avoid skipping updates
-    return trange(len(tasks), miniters=1, mininterval=0.000001, unit='tasks', desc='Total Progress')
+    return trange(
+        len(tasks),
+        miniters=1,
+        mininterval=0.000001,
+        unit="tasks",
+        desc="Total Progress",
+    )
 
 
 def run_tests():
@@ -195,24 +95,14 @@ def run_tests():
 
     args.json_filepath = os.path.abspath(args.json_filepath)
 
-    tasks = [
-        test_linq_sum_top_index_sorted,
-        test_list_head,
-        test_list_tail,
-        test_list_count_head_in_tail,
-        test_list_count_len_in_tail,
-        test_list_count_last_in_tail,
-        test_list_count_len_tail_in_tail,
-        test_list_count_head_tail_in_tail,
-        test_list_count_last_tail_in_tail,
-        test_list_count_head_tail_tail_tail,
-        test_list_count_n,
-    ]
+    tasks = get_stock_tasks()
 
     results = []
     for i in progress(tasks):
         t = tasks[i]
-        r = t(args)
+        source = t["source"]
+        kwargs = t.get("kwargs", {})
+        r = generate_examples(source, cli_args=args, **kwargs)
         results.append(r)
 
     print()  # required to move to next line due to progress bar

@@ -197,7 +197,7 @@ def generate_interesting(
 
     elapsed = time.time() - t
     tqdm.write("program: {}".format(source.replace("\n", " | ")))
-    pbar = tqdm(total=timeout, desc='IO For Program', unit='sec')
+    pbar = tqdm(total=timeout, desc="IO For Program", unit="sec")
 
     samples = 0
     last_progress = 0
@@ -240,7 +240,7 @@ def format_examples(program, io_pairs, elapsed, timeout, hit_timeout, samples):
         "runtime_seconds": elapsed,
         "timeout": timeout,
         "hit_timeout": hit_timeout,
-        "samples": samples
+        "samples": samples,
     }
 
 
@@ -298,8 +298,10 @@ def pretty_print_results(d, margin=7, debug=False):
         i = str(io_pair["i"])
         o = str(io_pair["o"])
         print("i: " + i.ljust(col_width) + "o: " + o)
-    if d['hit_timeout']:
-        print("WARN: Timeout hit while finding most interesting io_pairs for above program.")
+    if d["hit_timeout"]:
+        print(
+            "WARN: Timeout hit while finding most interesting io_pairs for above program."
+        )
     if debug:
         print(
             (
