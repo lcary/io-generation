@@ -1,6 +1,8 @@
 # task-generation
 
-A tool to return interesting input-output examples for learning list routines.
+A tool to return interesting, randomized input-output (IO) examples for learning list routines.
+
+Strategy: attempts to construct useful IO examples by a constraint propagation technique used by the DeepCoder paper (https://arxiv.org/abs/1611.01989), as well as maximizing output variance via de-duplication.
 
 Example usage:
 ```
