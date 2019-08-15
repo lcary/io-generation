@@ -3,11 +3,14 @@ from taskgen.dsl.linq import get_linq_dsl
 from taskgen.dsl.simple import get_list_dsl
 from taskgen.io import generate_interesting, test_io, pretty_print_results
 
+DEFAULT_MAXV = 99
+
 
 def _generate_interesting(*args, **kwargs):
     """ Run IO generation with default bounds and language. Print results. """
+    kwargs["timeout"] = kwargs.get("timeout", 10)
     kwargs["min_bound"] = kwargs.get("min_bound", 0)
-    kwargs["max_bound"] = kwargs.get("max_bound", 10)
+    kwargs["max_bound"] = kwargs.get("max_bound", 99)
     kwargs["language"] = kwargs.get("language", get_list_dsl(kwargs["max_bound"]))
     d = generate_interesting(*args, **kwargs)
     pretty_print_results(d)
@@ -41,7 +44,7 @@ def test_list_count_head_in_tail():
     count (head xs) (tail xs)
     """
     source = "a <- [int] | b <- tail a | c <- head a | d <- count c b"
-    d = _generate_interesting(source, num_examples=10, min_variance=3.5)
+    d = _generate_interesting(source, num_examples=10, min_variance=3.5, maxv=DEFAULT_MAXV)
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 0))
     test_io(d['program'], (([5, 4, 7, 5],), 1))
@@ -54,7 +57,7 @@ def test_list_count_len_in_tail():
     """
     source = "a <- [int] | b <- tail a | c <- len a | d <- count c b"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 2))
@@ -68,7 +71,7 @@ def test_list_count_last_in_tail():
     """
     source = "a <- [int] | b <- tail a | c <- last a | d <- count c b"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 2))
@@ -80,7 +83,7 @@ def test_list_count_len_tail_in_tail():
     """
     source = "a <- [int] | b <- tail a | c <- len b | d <- count c b"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 1))
@@ -92,7 +95,7 @@ def test_list_count_head_tail_in_tail():
     """
     source = "a <- [int] | b <- tail a | c <- head b | d <- count c b"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 2))
@@ -104,7 +107,7 @@ def test_list_count_last_tail_in_tail():
     """
     source = "a <- [int] | b <- tail a | c <- last b | d <- count c b"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 2))
@@ -116,7 +119,7 @@ def test_list_count_head_tail_tail_tail():
     """
     source = "a <- [int] | b <- tail a | c <- tail b | d <- tail c | e <- head d | f <- count e a"
     d = _generate_interesting(
-        source, num_examples=10, maxv=10, min_io_len=3, max_io_len=10, min_variance=3.5
+        source, num_examples=10, maxv=DEFAULT_MAXV, min_io_len=3, max_io_len=10, min_variance=3.5
     )
     verify_types(d['io_pairs'], sig=([int], int))
     test_io(d['program'], (([3, 5, 4, 7, 5],), 1))

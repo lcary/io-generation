@@ -1,3 +1,4 @@
+import random
 import time
 
 import numpy as np
@@ -41,6 +42,89 @@ def is_interesting(io_pairs, min_variance):
     return output_var >= min_variance
 
 
+BIAS_MAX = 10
+BIAS_AMOUNT = 0.97
+
+
+def biased_randint(minv, maxv, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
+    """
+    Biases random selection for numbers under bias_max in range(minv, maxv).
+
+    Example benchmarks for range(0, 99) and bias_max=10 showing average likelihood
+    of N being under 11.
+
+        for bias in [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99]:
+            ns = []
+            for i in range(50):
+                xs = [biased_randint(0, 99, bias_amount=bias) for _ in range(1000)]
+                ns.append(len([i for i in xs if i <= 10]) / 1000.0)
+            print("bias={}: ".format(bias), sum(ns) / float(len(ns)))
+
+        bias=0.9:  0.5008400000000001
+        bias=0.91:  0.5370600000000002
+        bias=0.92:  0.56798
+        bias=0.93:  0.6042799999999998
+        bias=0.94:  0.6418
+        bias=0.95:  0.6832600000000001
+        bias=0.96:  0.7304999999999999
+        bias=0.97:  0.7899200000000001
+        bias=0.98:  0.84718
+        bias=0.99:  0.9166199999999999
+    """
+    if maxv <= bias_max or minv >= bias_max:
+        return np.random.randint(minv, maxv)
+    probs = get_biased_probabilities(minv, maxv, bias_max, bias_amount)
+    res = np.random.multinomial(1, probs)
+    return np.argmax(res)
+
+
+def biased_randint_list(minv, maxv, array_size, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
+    """
+    Similar to biased_randint but for lists of ints.
+
+        for bias in [0.90, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99]:
+            ns = []
+            for i in range(50):
+                xs = biased_randint_list(0, 99, 1000, bias_amount=bias)
+                ns.append(len([i for i in xs if i <= 10]) / 1000.0)
+            print("bias={}: ".format(bias), sum(ns) / float(len(ns)))
+
+        bias=0.9:  0.5077799999999999
+        bias=0.91:  0.5371400000000001
+        bias=0.92:  0.5693199999999998
+        bias=0.93:  0.6054799999999998
+        bias=0.94:  0.6395200000000001
+        bias=0.95:  0.6826999999999999
+        bias=0.96:  0.7343799999999997
+        bias=0.97:  0.7850799999999998
+        bias=0.98:  0.8470199999999999
+        bias=0.99:  0.9174999999999999
+    """
+    if maxv <= bias_max or minv >= bias_max:
+        return list(np.random.randint(minv, maxv, size=array_size))
+    probs = get_biased_probabilities(minv, maxv, bias_max, bias_amount)
+    res = np.random.multinomial(array_size, probs, size=1)
+    vals = []
+    for (i, v) in enumerate(res[0]):
+        for j in range(v):
+            vals.append(i)
+    random.shuffle(vals)
+    return vals
+
+
+def get_biased_probabilities(minv, maxv, bias_max=BIAS_MAX, bias_amount=BIAS_AMOUNT):
+    probs = []
+    for i in range(maxv):
+        if i < minv:
+            probs.append(0)
+        elif i >= bias_max:
+            probs.append(1.0 - bias_amount)
+        else:
+            probs.append(bias_amount)
+    s = sum(probs)
+    return [i / s for i in probs]
+
+
 def generate_io_pairs(
     program, num_examples, max_bound, min_len=1, max_len=10
 ):  # TODO: allow empty lists
@@ -57,10 +141,10 @@ def generate_io_pairs(
         for a in range(input_nargs):
             minv, maxv = program.bounds[a]
             if input_types[a] == int:
-                input_value[a] = np.random.randint(minv, maxv)
+                input_value[a] = biased_randint(minv, maxv)
             elif input_types[a] == [int]:
                 array_size = np.random.randint(min_len, max_len)
-                input_value[a] = list(np.random.randint(minv, maxv, size=array_size))
+                input_value[a] = biased_randint_list(minv, maxv, array_size)
             else:
                 raise Exception(
                     "Unsupported input type "
