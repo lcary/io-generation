@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 
 from tqdm import trange
 
@@ -9,7 +10,7 @@ from taskgen.dsl.simple import get_list_dsl
 from taskgen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
-DEFAULT_JSON_FILE = "ioexamples.json"
+DEFAULT_OUTPUT_JSON = "io.json"
 
 
 def _serialize_programs(d):
@@ -25,9 +26,9 @@ def _serialize_programs(d):
     return newd
 
 
-def write_json(d, json_filepath):
+def write_json(d, to_json):
     d = _serialize_programs(d)
-    with open(json_filepath, "w") as f:
+    with open(to_json, "w") as f:
         json.dump(d, f)
 
 
@@ -82,11 +83,52 @@ def progress(tasks):
 
 def run_taskgen():
     args = get_args()
-    tasks = get_stock_tasks()
+    tasks = get_tasks(args)
     results = []
     for i in progress(tasks):
         collect_result(args, i, tasks, results)
     print_output(args, results)
+
+
+def get_tasks(args):
+    if args.stdin:
+        tasks = read_stdin()
+    elif args.from_json:
+        tasks = read_json(args)
+    elif args.from_txt:
+        tasks = read_txt(args)
+    else:
+        print("Demo mode:")
+        tasks = get_stock_tasks()
+    return tasks
+
+
+def read_json(args):
+    tasks = []
+    for fname in args.from_json:
+        with open(fname, "r") as f:
+            d = json.load(f)
+        for t in d:
+            assert "source" in t
+            tasks.append(t)
+    return tasks
+
+
+def read_txt(args):
+    tasks = []
+    for fname in args.from_txt:
+        with open(fname, "r") as f:
+            lines = f.readlines()
+        for source in lines:
+            tasks.append({"source": source.strip("\n")})
+    return tasks
+
+
+def read_stdin():
+    tasks = []
+    for line in sys.stdin:
+        tasks.append({"source": line.strip()})
+    return tasks
 
 
 def collect_result(args, index, tasks, results):
@@ -100,12 +142,12 @@ def collect_result(args, index, tasks, results):
 def print_output(args, results):
     print()  # required to move to next line due to progress bar
     if args.json:
-        write_json(results, args.json_filepath)
+        write_json(results, args.to_json)
     else:
         for d in results:
             pretty_print_results(d)
     if args.json:
-        print(args.json_filepath)
+        print(args.to_json)
 
 
 def get_args():
@@ -118,12 +160,13 @@ def get_args():
     parser.add_argument("--maxv", type=int, default=DEFAULT_MAXV)  # max value in list
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
-    parser.add_argument("--json-filepath", default=DEFAULT_JSON_FILE)
-    # group = parser.add_mutually_exclusive_group()
-    # group.add_argument('--foo', action='store_true')
-    # group.add_argument('--bar', action='store_false')
+    parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--stdin", action="store_true")
+    group.add_argument("--from-json", nargs="*")
+    group.add_argument("--from-txt", nargs="*")
     args = parser.parse_args()
-    args.json_filepath = os.path.abspath(args.json_filepath)
+    args.to_json = os.path.abspath(args.to_json)
     return args
 
 
