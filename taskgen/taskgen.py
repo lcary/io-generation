@@ -6,12 +6,12 @@ import sys
 from tqdm import trange
 
 from taskgen.compiler import Program
-from taskgen.dsl.linq import get_linq_dsl
-from taskgen.dsl.simple import get_list_dsl
+from taskgen.dsl import get_language_func
 from taskgen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
 DEFAULT_OUTPUT_JSON = "io.json"
+LANG_CHOICES = ("simplelist", "linq")
 
 
 def _serialize_programs(d):
@@ -82,15 +82,6 @@ def progress(tasks):
     )
 
 
-def run_taskgen():
-    args = get_args()
-    tasks = get_tasks(args)
-    results = []
-    for i in progress(tasks):
-        collect_result(args, i, tasks, results)
-    print_output(args, results)
-
-
 def get_tasks(args):
     if args.stdin:
         tasks = read_stdin()
@@ -132,12 +123,11 @@ def read_stdin():
     return tasks
 
 
-def collect_result(args, index, tasks, results):
+def get_result(args, index, tasks):
     t = tasks[index]
     source = t["source"]
     kwargs = t.get("kwargs", {})
-    r = generate_examples(source, cli_args=args, **kwargs)
-    results.append(r)
+    return generate_examples(source, cli_args=args, **kwargs)
 
 
 def print_output(args, results):
@@ -151,21 +141,7 @@ def print_output(args, results):
         print(args.to_json)
 
 
-def get_language_func(choice):
-    if choice == "simplelist":
-        def f(kwargs):
-            return get_list_dsl(kwargs["max_bound"])
-        return f
-    elif choice == "linq":
-        def f(kwargs):
-            language, _ = get_linq_dsl(kwargs["max_bound"], min_bound=kwargs["min_bound"])
-            return language
-        return f
-    else:
-        raise ValueError("Language type ({}) not recognized.".format(choice))
-
-
-def get_args():
+def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-examples", type=int, default=10)
     parser.add_argument("--timeout", type=int, default=10)
@@ -176,16 +152,23 @@ def get_args():
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)
-    parser.add_argument("--language", choices=["simplelist", "linq"], default="simplelist")
+    parser.add_argument("--language", choices=LANG_CHOICES, default="simplelist")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--stdin", action="store_true")
     group.add_argument("--from-json", nargs="*")
     group.add_argument("--from-txt", nargs="*")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.to_json = os.path.abspath(args.to_json)
     args.language = get_language_func(args.language)
     return args
 
 
+def main(args):
+    tasks = get_tasks(args)
+    results = [get_result(args, i, tasks) for i in progress(tasks)]
+    print_output(args, results)
+    return results
+
+
 if __name__ == "__main__":
-    run_taskgen()
+    main(parse_args(sys.argv[1:]))
