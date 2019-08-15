@@ -3,6 +3,7 @@ import time
 from collections import Counter
 
 import numpy as np
+from tqdm import tqdm
 
 from taskgen.compiler import compile_program
 from taskgen.constraints import is_int
@@ -192,8 +193,15 @@ def generate_interesting(
 
     interesting = False
     hit_timeout = False
-    elapsed = time.time() - t
     io_pairs = []
+
+    elapsed = time.time() - t
+    tqdm.write("program: {}".format(source.replace("\n", " | ")))
+    pbar = tqdm(total=timeout, desc='IO For Program', unit='sec')
+
+    samples = 0
+    last_progress = 0
+    last_elapsed = 0
 
     while not interesting and not hit_timeout:
         latest_io_pairs = generate_io_pairs(
@@ -203,6 +211,7 @@ def generate_interesting(
             min_len=min_io_len,
             max_len=max_io_len,
         )
+        samples += len(latest_io_pairs)
         io_pairs.extend(latest_io_pairs)
         io_pairs = reduce_io_pairs(io_pairs, num_examples)
         if is_interesting(io_pairs, min_variance):
@@ -211,10 +220,19 @@ def generate_interesting(
         if elapsed > timeout:
             hit_timeout = True
 
-    return format_examples(program, io_pairs, elapsed, timeout, hit_timeout)
+        n = elapsed - last_elapsed
+        last_elapsed = elapsed
+
+        pbar.set_postfix(io_samples=samples, refresh=False)
+        pbar.update(n)
+
+    pbar.update(100 - last_progress)
+    pbar.close()
+
+    return format_examples(program, io_pairs, elapsed, timeout, hit_timeout, samples)
 
 
-def format_examples(program, io_pairs, elapsed, timeout, hit_timeout):
+def format_examples(program, io_pairs, elapsed, timeout, hit_timeout, samples):
     return {
         "program": program,
         "io_pairs": [{"i": i, "o": o} for (i, o) in io_pairs],
@@ -222,6 +240,7 @@ def format_examples(program, io_pairs, elapsed, timeout, hit_timeout):
         "runtime_seconds": elapsed,
         "timeout": timeout,
         "hit_timeout": hit_timeout,
+        "samples": samples
     }
 
 

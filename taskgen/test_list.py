@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 
-from tqdm import tqdm
+from tqdm import trange
 
 from taskgen.compiler import Program
 from taskgen.constraints import verify_types
@@ -175,6 +175,11 @@ def test_list_count_n(args):
     return d
 
 
+def progress(tasks):
+    # A low mininterval setting is used to avoid skipping updates
+    return trange(len(tasks), miniters=1, mininterval=0.000001, unit='tasks', desc='Total Progress')
+
+
 def run_tests():
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-examples", type=int, default=10)
@@ -205,9 +210,12 @@ def run_tests():
     ]
 
     results = []
-    for t in tqdm(tasks, miniters=1, mininterval=0.000001):
+    for i in progress(tasks):
+        t = tasks[i]
         r = t(args)
         results.append(r)
+
+    print()  # required to move to next line due to progress bar
 
     if args.json:
         write_json(results, args.json_filepath)
