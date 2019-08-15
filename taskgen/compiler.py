@@ -146,6 +146,6 @@ def propagate_constraints(
                     min(limits[p][1], new_lims[a][1]),
                 )
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
-            print(("Program with no valid inputs: %s" % source_code))
+            print(("WARN: Program with no valid inputs: %s" % source_code))
             raise PropagationError
     return limits

@@ -35,7 +35,7 @@ def write_json(d, json_filepath):
 
 def generate_examples(*args, **kwargs):
     """
-    Run IO generation with defaults and pretty print the results.
+    Run IO generation with defaults set by CLI arguments.
     """
     cli_args = kwargs.pop("cli_args")
     kwargs.update(
