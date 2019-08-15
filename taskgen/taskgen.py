@@ -80,7 +80,35 @@ def progress(tasks):
     )
 
 
-def run_tests():
+def run_taskgen():
+    args = get_args()
+    tasks = get_stock_tasks()
+    results = []
+    for i in progress(tasks):
+        collect_result(args, i, tasks, results)
+    print_output(args, results)
+
+
+def collect_result(args, index, tasks, results):
+    t = tasks[index]
+    source = t["source"]
+    kwargs = t.get("kwargs", {})
+    r = generate_examples(source, cli_args=args, **kwargs)
+    results.append(r)
+
+
+def print_output(args, results):
+    print()  # required to move to next line due to progress bar
+    if args.json:
+        write_json(results, args.json_filepath)
+    else:
+        for d in results:
+            pretty_print_results(d)
+    if args.json:
+        print(args.json_filepath)
+
+
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-examples", type=int, default=10)
     parser.add_argument("--timeout", type=int, default=10)
@@ -91,31 +119,13 @@ def run_tests():
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--json-filepath", default=DEFAULT_JSON_FILE)
+    # group = parser.add_mutually_exclusive_group()
+    # group.add_argument('--foo', action='store_true')
+    # group.add_argument('--bar', action='store_false')
     args = parser.parse_args()
-
     args.json_filepath = os.path.abspath(args.json_filepath)
-
-    tasks = get_stock_tasks()
-
-    results = []
-    for i in progress(tasks):
-        t = tasks[i]
-        source = t["source"]
-        kwargs = t.get("kwargs", {})
-        r = generate_examples(source, cli_args=args, **kwargs)
-        results.append(r)
-
-    print()  # required to move to next line due to progress bar
-
-    if args.json:
-        write_json(results, args.json_filepath)
-    else:
-        for d in results:
-            pretty_print_results(d)
-
-    if args.json:
-        print(args.json_filepath)
+    return args
 
 
 if __name__ == "__main__":
-    run_tests()
+    run_taskgen()
