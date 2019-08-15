@@ -1,8 +1,15 @@
-# task-generation
+task-generation
+===============
 
 A tool to return interesting, randomized input-output (IO) examples for learning list routines.
 
-Strategy: attempts to construct useful IO examples by a constraint propagation technique used by the DeepCoder paper (https://arxiv.org/abs/1611.01989), as well as maximizing output variance via de-duplication.
+Strategy
+--------
+
+Strategy: attempts to construct useful IO examples using a constraint propagation technique from the DeepCoder paper (https://arxiv.org/abs/1611.01989), as well as maximizing output variance via de-duplication.
+
+Usage
+-----
 
 Example usage:
 ```
@@ -129,3 +136,11 @@ i: [36, [4]]                                 o: 0
 
 ./taskg  38.44s user 0.19s system 100% cpu 38.374 total
 ```
+
+Run `./taskg -h` for a list of parameterized settings.
+
+References
+----------
+
+ 1. https://arxiv.org/pdf/1611.01989.pdf
+ 2. https://www.biorxiv.org/content/10.1101/321505v1
