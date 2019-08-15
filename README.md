@@ -50,6 +50,34 @@ i: [[1, 2, 2, 2, 0, 4, 3, 4, 2]]       o: [2, 2, 2, 0, 4, 3, 4, 2]
 i: [[4, 0, 4]]                         o: [0, 4]
 ```
 
+Programs can also be input via plaintext file:
+```
+❯ echo "a <- [int] | b <- head a
+a <- [int] | b <- tail a
+a <- [int] | b <- tail a | c <- head a | d <- count c b
+a <- [int] | b <- tail a | c <- len a | d <- count c b
+a <- [int] | b <- tail a | c <- last a | d <- count c b
+a <- [int] | b <- tail a | c <- len b | d <- count c b
+a <- [int] | b <- tail a | c <- head b | d <- count c b
+a <- [int] | b <- tail a | c <- last b | d <- count c b" > programs.txt
+
+❯ ./taskg --from-txt programs.txt
+```
+Or, alternatively, from JSON:
+```
+❯ cat programs.json
+[
+    {"source": "a <- [int] | b <- tail a | c <- head a | d <- count c b"},
+    {"source": "a <- [int] | b <- tail a | c <- len a | d <- count c b"},
+    {"source": "a <- [int] | b <- tail a | c <- last a | d <- count c b"},
+    {"source": "a <- [int] | b <- tail a | c <- len b | d <- count c b"},
+    {"source": "a <- [int] | b <- tail a | c <- head b | d <- count c b"},
+    {"source": "a <- [int] | b <- tail a | c <- last b | d <- count c b"}
+]
+
+❯ ./taskg --from-json programs.json
+```
+
 To output to json, use the `--json` flag. Example:
 ```
 ❯ ./taskg --json
