@@ -2,32 +2,32 @@ import json
 from tempfile import NamedTemporaryFile
 import unittest
 
-from taskgen import taskgen
+from iogen import iogen
 
 LIST_HEAD_SOURCE = "a <- [int] | b <- head a"
 
 
 class TestTaskGen(unittest.TestCase):
     def test_stdin(self):
-        taskgen.sys.stdin = [LIST_HEAD_SOURCE]
-        args = taskgen.parse_args(["--stdin"])
-        result = taskgen.main(args)
+        iogen.sys.stdin = [LIST_HEAD_SOURCE]
+        args = iogen.parse_args(["--stdin"])
+        result = iogen.main(args)
         self.verify_list_head_result(result)
 
     def test_from_json(self):
         with NamedTemporaryFile(mode="w+") as f:
             json.dump([{"source": LIST_HEAD_SOURCE}], f)
             f.seek(0)
-            args = taskgen.parse_args(["--from-json", f.name])
-            result = taskgen.main(args)
+            args = iogen.parse_args(["--from-json", f.name])
+            result = iogen.main(args)
             self.verify_list_head_result(result)
 
     def test_from_txt(self):
         with NamedTemporaryFile(mode="w+") as f:
             f.write(LIST_HEAD_SOURCE)
             f.seek(0)
-            args = taskgen.parse_args(["--from-txt", f.name])
-            result = taskgen.main(args)
+            args = iogen.parse_args(["--from-txt", f.name])
+            result = iogen.main(args)
             self.verify_list_head_result(result)
 
     def verify_list_head_result(self, result):

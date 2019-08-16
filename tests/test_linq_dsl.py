@@ -1,9 +1,9 @@
 import unittest
 
-from taskgen.constraints import verify_types
-from taskgen.dsl.linq import get_linq_dsl
-from taskgen.dsl.simple import get_list_dsl
-from taskgen.io import test_io, generate_interesting
+from iogen.constraints import verify_types
+from iogen.dsl.linq import get_linq_dsl
+from iogen.dsl.simple import get_list_dsl
+from iogen.io import test_io, generate_interesting
 
 
 def generate_examples(*args, **kwargs):

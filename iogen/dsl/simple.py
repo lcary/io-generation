@@ -1,4 +1,4 @@
-from taskgen.dsl.types import Function
+from iogen.dsl.types import Function
 
 
 def get_list_dsl(max_bound, min_bound=None):
