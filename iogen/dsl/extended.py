@@ -98,14 +98,16 @@ def get_extended_dsl(max_bound, min_bound=None):
             lambda b: [(0, b[2]), (b[0], b[1])],
         ),
     ] + lambdas
-    DSL.extend([
-        Function(
-            "map " + l.src,
-            ([int], [int]),
-            lambda xs, l=l: list(map(l.fun, xs)),
-            lambda b, l=l: l.bounds((b[0], b[1])),
-        )
-        for l in lambdas
-        if l.sig == (int, int)
-    ])
+    DSL.extend(
+        [
+            Function(
+                "map " + l.src,
+                ([int], [int]),
+                lambda xs, l=l: list(map(l.fun, xs)),
+                lambda b, l=l: l.bounds((b[0], b[1])),
+            )
+            for l in lambdas
+            if l.sig == (int, int)
+        ]
+    )
     return DSL

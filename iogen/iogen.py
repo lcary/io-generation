@@ -150,7 +150,9 @@ def parse_args(args):
     parser.add_argument("--min-bound", type=int, default=0)
     parser.add_argument("--max-bound", type=int, default=99)
     parser.add_argument("--min-variance", type=float, default=3.5)
-    parser.add_argument("--maxv", help="max val for item in list", type=int, default=DEFAULT_MAXV)
+    parser.add_argument(
+        "--maxv", help="max val for item in list", type=int, default=DEFAULT_MAXV
+    )
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)

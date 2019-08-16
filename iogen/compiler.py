@@ -8,7 +8,12 @@ def get_language_dict(language):
 
 
 def compile_program(
-    language, source_code, max_bound, max_list_item_val, min_input_range_length=0, min_bound=None
+    language,
+    source_code,
+    max_bound,
+    max_list_item_val,
+    min_input_range_length=0,
+    min_bound=None,
 ):
     """
     Parses a program into an intermediate representation capable of constraints
@@ -148,7 +153,7 @@ def propagate_constraints(
                 )
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
             print(("WARN: Program with no valid inputs: %s" % source_code))
-            print('limits: ', limits)
-            print('limits[t]: ', limits[t])
+            print("limits: ", limits)
+            print("limits[t]: ", limits[t])
             raise PropagationError
     return limits

@@ -183,7 +183,11 @@ def generate_interesting(
     t = time.time()
     source = source.replace(" | ", "\n")
     program = compile_program(
-        language, source, min_bound=min_bound, max_bound=max_bound, max_list_item_val=maxv
+        language,
+        source,
+        min_bound=min_bound,
+        max_bound=max_bound,
+        max_list_item_val=maxv,
     )
 
     interesting = False
