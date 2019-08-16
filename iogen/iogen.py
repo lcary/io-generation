@@ -146,7 +146,7 @@ def print_output(args, results):
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-examples", type=int, default=10)
-    parser.add_argument("--timeout", type=int, default=10)
+    parser.add_argument("-t", "--timeout", type=int, default=10)
     parser.add_argument("--min-bound", type=int, default=0)
     parser.add_argument("--max-bound", type=int, default=99)
     parser.add_argument("--min-variance", type=float, default=3.5)
@@ -156,7 +156,7 @@ def parse_args(args):
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)
-    parser.add_argument("--language", choices=LANG_CHOICES, default="simplelist")
+    parser.add_argument("--language", choices=LANG_CHOICES, default="extended")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--stdin", action="store_true")
     group.add_argument("--from-json", nargs="*")
