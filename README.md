@@ -3,6 +3,8 @@ io-generation
 
 A tool to generate random input-output (IO) examples for learning list routines.
 
+This is a derivative of https://github.com/microsoft/DeepCoder-Utils
+
 Strategy
 --------
 
@@ -134,5 +136,6 @@ Run `./io -h` for a complete list of parameterized settings.
 References
 ----------
 
- 1. https://arxiv.org/pdf/1611.01989.pdf
- 2. https://www.biorxiv.org/content/10.1101/321505v1
+ 1. https://github.com/microsoft/DeepCoder-Utils
+ 2. https://arxiv.org/pdf/1611.01989.pdf
+ 3. https://www.biorxiv.org/content/10.1101/321505v1
