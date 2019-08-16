@@ -28,13 +28,13 @@ The input program syntax can be extended/modified by adding or updating an exist
 Usage
 -----
 
-Use either the `./iog` script to test this tool.
+Use either the `./io` script or the main entry point module (`python -m iogen.iogen`) to run this tool.
 
 This program requires Python 3 and the pip requirements installed by `pip install -r requirements.txt`.
 
 Generated IO examples will by default be output to the console. Demo:
 ```
-❯ time ./iog --maxv 10 --max-bound 10
+❯ time ./io --maxv 10 --max-bound 10
 Demo mode:
 ...
 program:  a <- [int] | b <- tail a | c <- last b | d <- count c b
@@ -50,12 +50,12 @@ i: [[3, 7, 7, 4, 7, 7, 6, 7]]          o: 5
 i: [[1]]                               o: 0
 ...
 
-./iog --maxv 10 --max-bound 10  4.61s user 0.13s system 107% cpu 4.424 total
+./io --maxv 10 --max-bound 10  4.61s user 0.13s system 107% cpu 4.424 total
 ```
 
 To generate IO examples a program from stdin, use the `--stdin` flag:
 ```
-❯ echo "a <- [int] | b <- tail a" | ./iog --stdin --maxv 5 --max-bound 5
+❯ echo "a <- [int] | b <- tail a" | ./io --stdin --maxv 5 --max-bound 5
 ...
 i: [[0, 3, 3, 4, 2, 2, 0]]             o: [3, 3, 4, 2, 2, 0]
 i: [[3, 3, 2]]                         o: [3, 2]
@@ -80,7 +80,7 @@ a <- [int] | b <- tail a | c <- len b | d <- count c b
 a <- [int] | b <- tail a | c <- head b | d <- count c b
 a <- [int] | b <- tail a | c <- last b | d <- count c b" > programs.txt
 
-❯ ./iog --from-txt programs.txt
+❯ ./io --from-txt programs.txt
 ```
 Or, alternatively, from JSON:
 ```
@@ -94,19 +94,19 @@ Or, alternatively, from JSON:
     {"source": "a <- [int] | b <- tail a | c <- last b | d <- count c b"}
 ]
 
-❯ ./iog --from-json programs.json
+❯ ./io --from-json programs.json
 ```
 
 To output to json, use the `--json` flag. Example:
 ```
-❯ ./iog --json
+❯ ./io --json
 ...
 /Users/lcary/w/mit/task-generation/io.json
 ```
 
 Note that higher bound values (min/max for input/output values) increase the runtime:
 ```
-❯ time ./iog --maxv 99 --max-bound 99
+❯ time ./io --maxv 99 --max-bound 99
 ...
 program:  a <- int | b <- [int] | c <- count a b
 i: [5, [9, 7, 4, 4]]                         o: 0
@@ -120,16 +120,16 @@ i: [0, [8, 0, 0, 17, 0, 0, 5, 3, 0]]         o: 5
 i: [4, [3]]                                  o: 0
 i: [36, [4]]                                 o: 0
 ...
-./iog --maxv 99 --max-bound 99  38.44s user 0.19s system 100% cpu 38.374 total
+./io --maxv 99 --max-bound 99  38.44s user 0.19s system 100% cpu 38.374 total
 ```
 
 Higher example numbers (`-n`) also increase runtime significantly:
 ```
-❯ time ./iog -n 100 > ioexamples.txt
-./iog -n 100 > ioexamples.txt  68.85s user 0.19s system 100% cpu 1:08.80 total
+❯ time ./io -n 100 > ioexamples.txt
+./io -n 100 > ioexamples.txt  68.85s user 0.19s system 100% cpu 1:08.80 total
 ```
 
-Run `./iog -h` for a complete list of parameterized settings.
+Run `./io -h` for a complete list of parameterized settings.
 
 References
 ----------
