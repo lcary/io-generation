@@ -38,6 +38,7 @@ def compile_program(
             min_bound=min_bound,
         )
     except PropagationError:
+        print("WARN: PropagationError")
         return None
 
     program_executor = Executor(input_types, functions, pointers, program_length)
@@ -147,5 +148,7 @@ def propagate_constraints(
                 )
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
             print(("WARN: Program with no valid inputs: %s" % source_code))
+            print('limits: ', limits)
+            print('limits[t]: ', limits[t])
             raise PropagationError
     return limits

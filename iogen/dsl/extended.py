@@ -15,6 +15,11 @@ def mul_bounds(lower_bound, upper_bound):
     return sqr_bounds(0, min(-(lower_bound + 1), upper_bound))
 
 
+def add_sub_bounds(b):
+    bounds = (int(b[0] / 2) + 1, int(b[1] / 2))
+    return bounds
+
+
 def get_extended_dsl(max_bound, min_bound=None):
     Null = max_bound
     lambdas = [
@@ -25,13 +30,13 @@ def get_extended_dsl(max_bound, min_bound=None):
             "+",
             (int, int, int),
             lambda i, j: i + j,
-            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
+            lambda b: [add_sub_bounds(b), add_sub_bounds(b)],
         ),
         Function(
             "-",
             (int, int, int),
             lambda i, j: i - j,
-            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
+            lambda b: [add_sub_bounds(b), add_sub_bounds(b)],
         ),
     ]
     DSL = [
@@ -92,7 +97,7 @@ def get_extended_dsl(max_bound, min_bound=None):
             lambda n, xs: xs[n] if 0 <= n < len(xs) else Null,
             lambda b: [(0, b[2]), (b[0], b[1])],
         ),
-    ]
+    ] + lambdas
     DSL.extend([
         Function(
             "map " + l.src,

@@ -102,6 +102,8 @@ def read_json(args):
             d = json.load(f)
         for t in d:
             assert "source" in t
+            if t.get("skip", False):
+                continue
             tasks.append(t)
     return tasks
 
