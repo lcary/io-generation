@@ -101,7 +101,7 @@ def get_extended_dsl(max_bound, min_bound=None):
     DSL.extend(
         [
             Function(
-                "map " + l.src,
+                "map(" + l.src + ")",
                 ([int], [int]),
                 lambda xs, l=l: list(map(l.fun, xs)),
                 lambda b, l=l: l.bounds((b[0], b[1])),
@@ -110,4 +110,19 @@ def get_extended_dsl(max_bound, min_bound=None):
             if l.sig == (int, int)
         ]
     )
+    curried = lambda f, n: lambda x: f(x, n)
+    DSL.extend(
+        [
+            Function(
+                "map(" + l.src + ")",
+                (int, [int], [int]),
+                lambda n, xs, l=l: list(map(curried(l.fun, n), xs)),
+                lambda b, l=l: l.bounds((b[0], b[1])),
+            )
+            for l in lambdas
+            if l.sig == (int, int, int)
+        ]
+    )
+    if len(DSL) != len(set(l.src for l in DSL)):
+        print("Duplicates exist in DSL ({})".format([l.src for l in DSL]))
     return DSL

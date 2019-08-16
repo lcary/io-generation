@@ -30,6 +30,23 @@ class TestExtendedDSL(unittest.TestCase):
         test_io(program, (([3, 5, 4, 7, 5], 5), 10))
         self.assertEqual(program.bounds, [(1, 5), (1, 5)])
 
+    def test_subtract_head(self):
+        source = "a <- [int] | b <- int | c <- head a | d <- - c b"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], int))
+        test_io(program, ([[7, 8, 22, 1, 2, 33], 5], 2))
+        self.assertEqual(program.bounds, [(1, 5), (1, 5)])
+
+    # TODO: fix
+    # def test_multiply_n(self):
+    #     source = "a <- int | b <- * a a"
+    #     d = generate_examples(source, maxv=10, max_bound=300, min_bound=1)
+    #     program = d["program"]
+    #     verify_types(d["io_pairs"], sig=(int, int))
+    #     test_io(program, ([5,], 10))
+    #     self.assertEqual(program.bounds, [(1, 5), (1, 5)])
+
     def test_last_sorted(self):
         source = "a <- [int] | b <- int | c <- sort a | d <- last c"
         d = generate_examples(source)
@@ -77,6 +94,22 @@ class TestExtendedDSL(unittest.TestCase):
         verify_types(d["io_pairs"], sig=([int], [int]))
         test_io(program, (([3, 5, 4, 7, 5],), [3, 4, 5, 5, 7]))
         self.assertEqual(program.bounds, [(0, 10)])
+
+    def test_map_add_n(self):
+        source = "a <- [int] | b <- int | c <- map(+) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        test_io(program, ([[7, 8, 22, 1, 2, 33], 5], [12, 13, 27, 6, 7, 38]))
+        self.assertEqual(program.bounds, [(1, 5), (1, 5)])
+
+    def test_map_subtract_n(self):
+        source = "a <- [int] | b <- int | c <- map(-) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        test_io(program, ([[7, 8, 22, 33], 5], [2, 3, 17, 28]))
+        self.assertEqual(program.bounds, [(1, 5), (1, 5)])
 
 
 if __name__ == "__main__":
