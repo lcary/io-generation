@@ -1,6 +1,6 @@
-from taskgen.dsl.extended import get_extended_dsl
-from taskgen.dsl.linq import get_linq_dsl
-from taskgen.dsl.simple import get_list_dsl
+from iogen.dsl.extended import get_extended_dsl
+from iogen.dsl.linq import get_linq_dsl
+from iogen.dsl.simple import get_list_dsl
 
 
 def get_language_func(choice):

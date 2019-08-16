@@ -5,9 +5,9 @@ import sys
 
 from tqdm import trange
 
-from taskgen.compiler import Program
-from taskgen.dsl import get_language_func
-from taskgen.io import generate_interesting, pretty_print_results
+from iogen.compiler import Program
+from iogen.dsl import get_language_func
+from iogen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
 DEFAULT_OUTPUT_JSON = "io.json"

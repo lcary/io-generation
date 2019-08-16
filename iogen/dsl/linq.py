@@ -1,6 +1,6 @@
 from math import sqrt, ceil
 
-from taskgen.dsl.types import Function
+from iogen.dsl.types import Function
 
 
 def scanl1(f, xs):

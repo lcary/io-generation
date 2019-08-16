@@ -5,8 +5,8 @@ from collections import Counter
 import numpy as np
 from tqdm import tqdm
 
-from taskgen.compiler import compile_program
-from taskgen.constraints import is_int
+from iogen.compiler import compile_program
+from iogen.constraints import is_int
 
 
 def get_inputs(io_pairs):
