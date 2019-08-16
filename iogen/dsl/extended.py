@@ -1,6 +1,6 @@
 from math import sqrt, ceil
 
-from taskgen.dsl.types import Function
+from iogen.dsl.types import Function
 
 
 def sqr_bounds(lower_bound, upper_bound):
@@ -17,7 +17,24 @@ def mul_bounds(lower_bound, upper_bound):
 
 def get_extended_dsl(max_bound, min_bound=None):
     Null = max_bound
-    return [
+    lambdas = [
+        Function(
+            "*", (int, int, int), lambda i, j: i * j, lambda b: mul_bounds(b[0], b[1])
+        ),
+        Function(
+            "+",
+            (int, int, int),
+            lambda i, j: i + j,
+            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
+        ),
+        Function(
+            "-",
+            (int, int, int),
+            lambda i, j: i - j,
+            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
+        ),
+    ]
+    DSL = [
         Function(
             "head",
             ([int], int),
@@ -75,19 +92,15 @@ def get_extended_dsl(max_bound, min_bound=None):
             lambda n, xs: xs[n] if 0 <= n < len(xs) else Null,
             lambda b: [(0, b[2]), (b[0], b[1])],
         ),
-        Function(
-            "*", (int, int, int), lambda i, j: i * j, lambda b: mul_bounds(b[0], b[1])
-        ),
-        Function(
-            "+",
-            (int, int, int),
-            lambda i, j: i + j,
-            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
-        ),
-        Function(
-            "-",
-            (int, int, int),
-            lambda i, j: i - j,
-            lambda b: [(int(b[0] / 2) + 1, int(b[1] / 2))],
-        ),
     ]
+    DSL.extend([
+        Function(
+            "map " + l.src,
+            ([int], [int]),
+            lambda xs, l=l: list(map(l.fun, xs)),
+            lambda b, l=l: l.bounds((b[0], b[1])),
+        )
+        for l in lambdas
+        if l.sig == (int, int)
+    ])
+    return DSL
