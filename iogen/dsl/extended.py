@@ -20,6 +20,10 @@ def add_sub_bounds(b):
     return bounds
 
 
+def curry(f, n):
+    return lambda x: f(x, n)
+
+
 def get_extended_dsl(max_bound, min_bound=None):
     Null = max_bound
     lambdas = [
@@ -38,6 +42,40 @@ def get_extended_dsl(max_bound, min_bound=None):
             lambda i, j: i - j,
             lambda b: [add_sub_bounds(b), add_sub_bounds(b)],
         ),
+        Function(
+            ">",
+            (int, int, bool),
+            lambda i, j: i > j,
+            lambda b: [(b[0], b[1]), (b[0], b[1])],
+        ),
+        Function(
+            "<",
+            (int, int, bool),
+            lambda i, j: i < j,
+            lambda b: [(b[0], b[1]), (b[0], b[1])],
+        ),
+        Function(
+            ">=",
+            (int, int, bool),
+            lambda i, j: i >= j,
+            lambda b: [(b[0], b[1]), (b[0], b[1])],
+        ),
+        Function(
+            "<=",
+            (int, int, bool),
+            lambda i, j: i <= j,
+            lambda b: [(b[0], b[1]), (b[0], b[1])],
+        ),
+        Function(
+            "==",
+            (int, int, bool),
+            lambda i, j: i == j,
+            lambda b: [(b[0], b[1]), (b[0], b[1])],
+        ),
+        Function("positive?", (int, bool), lambda i: i > 0, lambda b: [(b[0], b[1])]),
+        Function("negative?", (int, bool), lambda i: i < 0, lambda b: [(b[0], b[1])]),
+        Function("odd?", (int, bool), lambda i: i % 2 == 1, lambda b: [(b[0], b[1])]),
+        Function("even?", (int, bool), lambda i: i % 2 == 0, lambda b: [(b[0], b[1])]),
     ]
     DSL = [
         Function(
@@ -110,17 +148,40 @@ def get_extended_dsl(max_bound, min_bound=None):
             if l.sig == (int, int)
         ]
     )
-    curried = lambda f, n: lambda x: f(x, n)
     DSL.extend(
         [
             Function(
                 "map(" + l.src + ")",
                 (int, [int], [int]),
-                lambda n, xs, l=l: list(map(curried(l.fun, n), xs)),
+                lambda n, xs, l=l: list(map(curry(l.fun, n), xs)),
                 lambda b, l=l: l.bounds((b[0], b[1])),
             )
             for l in lambdas
             if l.sig == (int, int, int)
+        ]
+    )
+    DSL.extend(
+        [
+            Function(
+                "filter(" + l.src + ")",
+                ([int], [int]),
+                lambda xs, l=l: list(filter(l.fun, xs)),
+                lambda b, l=l: [(b[0], b[1])],
+            )
+            for l in lambdas
+            if l.sig == (int, bool)
+        ]
+    )
+    DSL.extend(
+        [
+            Function(
+                "filter(" + l.src + ")",
+                (int, [int], [int]),
+                lambda n, xs, l=l: list(filter(curry(l.fun, n), xs)),
+                lambda b, l=l: [(b[0], b[1]), (b[0], b[1])],
+            )
+            for l in lambdas
+            if l.sig == (int, int, bool)
         ]
     )
     if len(DSL) != len(set(l.src for l in DSL)):

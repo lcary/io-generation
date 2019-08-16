@@ -22,6 +22,11 @@ class IntConstraint(object):
         return is_int(val) and self.minv <= val <= self.maxv
 
 
+class BoolConstraint(object):
+    def verify(self, val):
+        return isinstance(val, bool)
+
+
 class ListConstraint(object):
     def __init__(self, min_len=0, max_len=10, item_constraint=IntConstraint()):
         self.min_len = min_len
@@ -86,6 +91,8 @@ def verify_output_type(o, out_type):
         assert IntConstraint().verify(o)
     elif out_type == [int]:
         assert ListConstraint().verify(o)
+    elif out_type == bool:
+        assert BoolConstraint().verify(o)
     else:
         raise ValueError("ERROR: unsupported output type ({})".format(out_type))
 

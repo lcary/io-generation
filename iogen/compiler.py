@@ -147,10 +147,18 @@ def propagate_constraints(
             num_args = len(functions[t].sig) - 1
             for a in range(num_args):
                 p = pointers[t][a]
-                limits[pointers[t][a]] = (
-                    max(limits[p][0], new_lims[a][0]),
-                    min(limits[p][1], new_lims[a][1]),
-                )
+                try:
+                    limits[pointers[t][a]] = (
+                        max(limits[p][0], new_lims[a][0]),
+                        min(limits[p][1], new_lims[a][1]),
+                    )
+                except IndexError as e:
+                    print(e)
+                    print("limits: ", limits)
+                    print("new_lims: ", new_lims)
+                    print("p: ", p)
+                    print("a: ", a)
+                    raise e
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
             print(("WARN: Program with no valid inputs: %s" % source_code))
             print("limits: ", limits)

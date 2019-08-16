@@ -80,7 +80,9 @@ class TestExtendedDSL(unittest.TestCase):
         self.assertEqual(program.bounds, [(0, 10), (0, 10)])
 
     def test_count_uniques(self):
-        source = "a <- [int] | b <- tail a | c <- unique b | d <- last c | e <- count d b"
+        source = (
+            "a <- [int] | b <- tail a | c <- unique b | d <- last c | e <- count d b"
+        )
         d = generate_examples(source, min_io_len=3)
         program = d["program"]
         verify_types(d["io_pairs"], sig=([int], int))
@@ -110,6 +112,176 @@ class TestExtendedDSL(unittest.TestCase):
         verify_types(d["io_pairs"], sig=([[int], int], [int]))
         test_io(program, ([[7, 8, 22, 33], 5], [2, 3, 17, 28]))
         self.assertEqual(program.bounds, [(1, 5), (1, 5)])
+
+    def test_last_gte(self):
+        source = "a <- [int] | b <- int | c <- last a | d <- >= b c"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[6, 0, 3], 3]
+        o = True
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_last_lt(self):
+        source = "a <- [int] | b <- int | c <- last a | d <- < b c"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[3, 0, 2, 7, 1, 8, 2], 88]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_last_lte(self):
+        source = "a <- [int] | b <- int | c <- last a | d <- <= b c"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[0, 1, 3, 7, 15, 9, 8, 0], 3]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_last_gt(self):
+        source = "a <- [int] | b <- int | c <- last a | d <- > b c"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[1, 8, 2, 2, 61, 0, 9], 0]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_last_eq(self):
+        source = "a <- [int] | b <- int | c <- last a | d <- == b c"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[4, 8, 4, 52, 5, 4], 56]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_even(self):
+        source = "a <- [int] | b <- int | c <- even? b"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[57, 6], 6]
+        o = True
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_odd(self):
+        source = "a <- [int] | b <- int | c <- odd? b"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[6], 2]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_neg(self):
+        source = "a <- [int] | b <- int | c <- negative? b"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[5], 2]
+        o = False
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_pos(self):
+        source = "a <- [int] | b <- int | c <- positive? b"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], bool))
+        i = [[4, 2], 5]
+        o = True
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_gte(self):
+        source = "a <- [int] | b <- int | c <- filter(>=) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        i = [[4], 8]
+        o = []
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_lt(self):
+        source = "a <- [int] | b <- int | c <- filter(<) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        i = [[9, 1, 7, 4, 5, 7, 85, 4], 9]
+        o = [1, 7, 4, 5, 7, 4]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_lte(self):
+        source = "a <- [int] | b <- int | c <- filter(<=) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        i = [[6, 0, 51, 9], 6]
+        o = [6, 0]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_gt(self):
+        source = "a <- [int] | b <- int | c <- filter(>) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        i = [[2, 7, 60, 31, 0, 5, 7, 75], 9]
+        o = [60, 31, 75]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_eq(self):
+        source = "a <- [int] | b <- int | c <- filter(==) b a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([[int], int], [int]))
+        i = [[7, 0, 6, 8, 9, 6, 70, 3, 9], 8]
+        o = [8]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10), (0, 10)])
+
+    def test_filter_even(self):
+        source = "a <- [int] | b <- filter(even?) a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([int], [int]))
+        i = [[2, 6]]
+        o = [2, 6]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10)])
+
+    def test_filter_odd(self):
+        source = "a <- [int] | b <- filter(odd?) a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([int], [int]))
+        i = [[8, 7, 20, 1, 8]]
+        o = [7, 1]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10)])
+
+    def test_filter_pos(self):
+        source = "a <- [int] | b <- filter(positive?) a"
+        d = generate_examples(source)
+        program = d["program"]
+        verify_types(d["io_pairs"], sig=([int], [int]))
+        i = [[9, 0, 1, 3]]
+        o = [9, 1, 3]
+        test_io(program, (i, o))
+        self.assertEqual(program.bounds, [(0, 10)])
 
 
 if __name__ == "__main__":

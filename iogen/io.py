@@ -160,6 +160,7 @@ def generate_io_pairs(
             (program.out == int and output_value <= max_bound)
             or (program.out == [int] and len(output_value) == 0)
             or (program.out == [int] and max(output_value) <= max_bound)
+            or program.out == bool
         )
     return io_pairs
 
