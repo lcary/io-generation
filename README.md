@@ -8,6 +8,23 @@ Strategy
 
 This tool constructs IO examples using a constraint propagation technique from the [DeepCoder](https://arxiv.org/abs/1611.01989) paper. The tool additionally maximizes the variance of the output values via de-duplication and repeated sampling from a multinomial distribution. The goal is to increase the entropy of the inputs and outputs in each set of IO pairs for a task. For example, if a task is to learn a counting function from a bunch of input-output examples, it's impossible to learn it if all of the output values are equal to zero.
 
+
+Program Syntax
+--------------
+
+This tool takes programs as inputs and produces IO examples as outputs.
+
+Default program syntax is similar to the LINQ-like language from the DeepCoder paper. 
+
+For example the below program uses the `simplelist` DSL, takes a list of integers and an integer as inputs, and counts the number of occurences of the input integer within the tail of the list:
+```
+a <- [int]
+b <- int
+c <- tail a
+d <- count b c
+```
+The input program syntax can be extended/modified by adding or updating an existing DSL.
+
 Usage
 -----
 
@@ -33,7 +50,6 @@ i: [[1]]                               o: 0
 
 ./taskg --maxv 10 --max-bound 10  4.61s user 0.13s system 107% cpu 4.424 total
 ```
-Default program syntax (which can be extended by adding a DSL) is similar to the LINQ-like language from the DeepCoder paper.
 
 To generate IO examples a program from stdin, use the `--stdin` flag:
 ```
