@@ -97,5 +97,7 @@ def verify_input_type(i, in_type):
         assert ArgConstraints(ListConstraint()).verify(i)
     elif in_type == [int, [int]]:
         assert ArgConstraints(IntConstraint(), ListConstraint()).verify(i)
+    elif in_type == [[int], int]:
+        assert ArgConstraints(ListConstraint(), IntConstraint()).verify(i)
     else:
         raise ValueError("ERROR: unsupported input type ({})".format(in_type))
