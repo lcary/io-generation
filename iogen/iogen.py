@@ -11,7 +11,7 @@ from iogen.io import generate_interesting, pretty_print_results
 
 DEFAULT_MAXV = 99
 DEFAULT_OUTPUT_JSON = "io.json"
-LANG_CHOICES = ("simplelist", "linq")
+LANG_CHOICES = ("simplelist", "linq", "extended")
 
 
 def _serialize_programs(d):
@@ -102,6 +102,8 @@ def read_json(args):
             d = json.load(f)
         for t in d:
             assert "source" in t
+            if t.get("skip", False):
+                continue
             tasks.append(t)
     return tasks
 
@@ -148,7 +150,9 @@ def parse_args(args):
     parser.add_argument("--min-bound", type=int, default=0)
     parser.add_argument("--max-bound", type=int, default=99)
     parser.add_argument("--min-variance", type=float, default=3.5)
-    parser.add_argument("--maxv", type=int, default=DEFAULT_MAXV)  # max value in list
+    parser.add_argument(
+        "--maxv", help="max val for item in list", type=int, default=DEFAULT_MAXV
+    )
     parser.add_argument("--max-io-len", type=int, default=10)
     parser.add_argument("--json", action="store_true", default=False)
     parser.add_argument("--to-json", default=DEFAULT_OUTPUT_JSON)

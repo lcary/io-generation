@@ -8,7 +8,12 @@ def get_language_dict(language):
 
 
 def compile_program(
-    language, source_code, max_bound, L, min_input_range_length=0, min_bound=None
+    language,
+    source_code,
+    max_bound,
+    max_list_item_val,
+    min_input_range_length=0,
+    min_bound=None,
 ):
     """
     Parses a program into an intermediate representation capable of constraints
@@ -18,7 +23,7 @@ def compile_program(
         - language: a DSL used to parse the tokens in a program
         - source_code: string of source that will be parsed
         - max_bound: max value allowed as integer
-        - L: "tape lengths"  # TODO: improve this definition
+        - max_list_item_val: max value allowed as int for list item
         - min_bound: min value allowed as integer (default: -max_bound)
     """
     functions, input_types, pointers, types = parse_source(language, source_code)
@@ -29,7 +34,7 @@ def compile_program(
         limits = propagate_constraints(
             source_code,
             max_bound,
-            L,
+            max_list_item_val,
             program_length,
             input_length,
             min_input_range_length,
@@ -38,6 +43,7 @@ def compile_program(
             min_bound=min_bound,
         )
     except PropagationError:
+        print("WARN: PropagationError")
         return None
 
     program_executor = Executor(input_types, functions, pointers, program_length)
@@ -117,7 +123,7 @@ class PropagationError(Exception):
 def propagate_constraints(
     source_code,
     max_bound,
-    L,
+    max_list_item_val,
     program_length,
     input_length,
     min_input_range_length,
@@ -132,20 +138,30 @@ def propagate_constraints(
     if min_bound is None:
         min_bound = -max_bound
     limits = [(min_bound, max_bound)] * program_length
-    if L is None:
+    if max_list_item_val is None:
         return limits
     for t in range(program_length - 1, -1, -1):
         if t >= input_length:
             lim_l, lim_u = limits[t]
-            new_lims = functions[t].bounds((lim_l, lim_u, L))
+            new_lims = functions[t].bounds((lim_l, lim_u, max_list_item_val))
             num_args = len(functions[t].sig) - 1
             for a in range(num_args):
                 p = pointers[t][a]
-                limits[pointers[t][a]] = (
-                    max(limits[p][0], new_lims[a][0]),
-                    min(limits[p][1], new_lims[a][1]),
-                )
+                try:
+                    limits[pointers[t][a]] = (
+                        max(limits[p][0], new_lims[a][0]),
+                        min(limits[p][1], new_lims[a][1]),
+                    )
+                except IndexError as e:
+                    print(e)
+                    print("limits: ", limits)
+                    print("new_lims: ", new_lims)
+                    print("p: ", p)
+                    print("a: ", a)
+                    raise e
         elif min_input_range_length >= limits[t][1] - limits[t][0]:
             print(("WARN: Program with no valid inputs: %s" % source_code))
+            print("limits: ", limits)
+            print("limits[t]: ", limits[t])
             raise PropagationError
     return limits

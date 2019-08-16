@@ -1,3 +1,4 @@
+from iogen.dsl.extended import get_extended_dsl
 from iogen.dsl.linq import get_linq_dsl
 from iogen.dsl.simple import get_list_dsl
 
@@ -7,6 +8,12 @@ def get_language_func(choice):
 
         def f(kwargs):
             return get_list_dsl(kwargs["max_bound"])
+
+        return f
+    elif choice == "extended":
+
+        def f(kwargs):
+            return get_extended_dsl(kwargs["max_bound"], min_bound=kwargs["min_bound"])
 
         return f
     elif choice == "linq":
