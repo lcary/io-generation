@@ -1,4 +1,4 @@
-task-generation
+io-generation
 ===============
 
 A tool to generate random input-output (IO) examples for learning list routines.
